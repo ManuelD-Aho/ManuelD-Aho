@@ -17,20 +17,20 @@ class EmailService {
         try {
             // Charger la configuration SMTP
             $config = require __DIR__ . '/../config/email.php';
-            
+
             // Configuration du serveur SMTP
             $this->mailer->isSMTP();
             $this->mailer->Host = $config['smtp']['host'];
             $this->mailer->SMTPAuth = true;
             $this->mailer->Username = $config['smtp']['username'];
             $this->mailer->Password = $config['smtp']['password'];
-            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $this->mailer->SMTPSecure = $config['smtp']['encryption'];
             $this->mailer->Port = $config['smtp']['port'];
             $this->mailer->CharSet = 'UTF-8';
 
             // Configuration de l'expéditeur
             $this->mailer->setFrom($config['smtp']['from_email'], $config['smtp']['from_name']);
-            
+
         } catch (Exception $e) {
             error_log("Erreur de configuration PHPMailer: " . $e->getMessage());
         }
@@ -41,7 +41,7 @@ class EmailService {
             $this->mailer->clearAddresses();
             $this->mailer->addAddress($to);
             $this->mailer->Subject = $subject;
-            
+
             if ($isHTML) {
                 $this->mailer->isHTML(true);
                 $this->mailer->Body = $message;
@@ -59,28 +59,28 @@ class EmailService {
 
     public function sendResultEmail($studentEmail, $studentName, $resume, $decision) {
         $subject = "Résultat de votre candidature à la soutenance";
-        
+
         // Message HTML
         $htmlMessage = $this->generateHTMLResultMessage($studentName, $resume, $decision);
-        
+
         // Message texte simple
         $textMessage = $this->generateTextResultMessage($studentName, $resume, $decision);
-        
+
         // Envoyer en HTML
         $success = $this->sendEmail($studentEmail, $subject, $htmlMessage, true);
-        
+
         if (!$success) {
             // Si l'envoi HTML échoue, essayer en texte simple
             return $this->sendEmail($studentEmail, $subject, $textMessage, false);
         }
-        
+
         return $success;
     }
 
     private function generateHTMLResultMessage($studentName, $resume, $decision) {
         $statusColor = ($decision === 'Validée') ? '#10B981' : '#EF4444';
         $statusIcon = ($decision === 'Validée') ? '🎉' : '❌';
-        
+
         $html = "
         <!DOCTYPE html>
         <html>
@@ -113,18 +113,18 @@ class EmailService {
                 </div>
                 
                 <h4>Résumé détaillé de l'évaluation :</h4>";
-        
+
         foreach ($resume as $etape => $data) {
             $etapeName = ucfirst($etape);
             $validation = $data['validation'];
             $badgeClass = ($validation === 'validé') ? 'validé' : 'rejeté';
             $stepClass = ($validation === 'validé') ? 'validé' : 'rejeté';
-            
+
             $html .= "
                 <div class='step {$stepClass}'>
                     <h5>{$etapeName}</h5>
                     <p><strong>Validation :</strong> <span class='badge {$badgeClass}'>" . strtoupper($validation) . "</span></p>";
-            
+
             // Ajouter les détails spécifiques à chaque étape
             if ($etape === 'scolarite') {
                 $html .= "<p><strong>Statut :</strong> {$data['statut']}</p>";
@@ -139,10 +139,10 @@ class EmailService {
                 $html .= "<p><strong>Moyenne :</strong> {$data['moyenne']}</p>";
                 $html .= "<p><strong>Unités validées :</strong> {$data['unites']}</p>";
             }
-            
+
             $html .= "</div>";
         }
-        
+
         if ($decision === 'Validée') {
             $html .= "
                 <div style='background-color: #f0fdf4; padding: 15px; border-radius: 5px; margin: 20px 0;'>
@@ -156,7 +156,7 @@ class EmailService {
                     <p>Pour toute question, contactez le service pédagogique.</p>
                 </div>";
         }
-        
+
         $html .= "
                 <div class='footer'>
                     <p>Cordialement,<br>L'équipe pédagogique</p>
@@ -164,33 +164,33 @@ class EmailService {
             </div>
         </body>
         </html>";
-        
+
         return $html;
     }
 
     private function generateTextResultMessage($studentName, $resume, $decision) {
         $message = "Bonjour {$studentName},\n\n";
         $message .= "L'évaluation de votre candidature à la soutenance est terminée.\n\n";
-        
+
         if ($decision === 'Validée') {
             $message .= "🎉 FÉLICITATIONS ! Votre candidature a été VALIDÉE.\n\n";
         } else {
             $message .= "❌ Votre candidature a été REJETÉE.\n\n";
         }
-        
+
         $message .= "RÉSUMÉ DÉTAILLÉ DE L'ÉVALUATION :\n";
         $message .= "==================================\n\n";
-        
+
         foreach ($resume as $etape => $data) {
             $etapeName = ucfirst($etape);
             $validation = $data['validation'];
             $status = ($validation === 'validé') ? '✅' : '❌';
-            
+
             $message .= "{$status} {$etapeName} : " . strtoupper($validation) . "\n";
         }
-        
+
         $message .= "\n";
-        
+
         if ($decision === 'Validée') {
             $message .= "Vous pouvez maintenant procéder à votre soutenance.\n";
             $message .= "Vous recevrez bientôt les détails de l'organisation.\n";
@@ -198,9 +198,9 @@ class EmailService {
             $message .= "Veuillez corriger les problèmes identifiés et soumettre une nouvelle candidature.\n";
             $message .= "Pour toute question, contactez le service pédagogique.\n";
         }
-        
+
         $message .= "\nCordialement,\nL'équipe pédagogique";
-        
+
         return $message;
     }
 } 
