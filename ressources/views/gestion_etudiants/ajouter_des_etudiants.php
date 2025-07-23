@@ -33,18 +33,171 @@ error_log("View - All Etudiants Count: " . count($allEtudiants));
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des étudiants</title>
+    <title>Gestion des étudiants | Université</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-primary': '#3457cb',
+                        'custom-primary-dark': '#24407a',
+                        'custom-success-dark': '#36865a',
+                        'custom-success-light': '#59bf3d',
+                    },
+                    animation: {
+                        'fade-in-down': 'fadeInDown 0.8s ease-out forwards',
+                        'slide-in-right': 'slideInRight 0.8s ease-out forwards',
+                        'scale-in': 'scaleIn 0.5s ease-out forwards',
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+        }
 
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .header-gradient {
+            background: linear-gradient(135deg, #24407a 0%, #3457cb 100%);
+        }
+
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
+            transform: scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-content.show {
+            transform: scale(1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3457cb 0%, #24407a 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(52, 87, 203, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 87, 203, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #36865a 0%, #59bf3d 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(54, 134, 90, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(54, 134, 90, 0.4);
+        }
+
+        .initial-hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .form-input {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            border-color: #3457cb;
+            box-shadow: 0 0 0 3px rgba(52, 87, 203, 0.1);
+            outline: none;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-50">
-    <div class="relative container mx-auto px-4 py-8">
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Header Section -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 mb-8 relative overflow-hidden animate-fade-in-down">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-custom-primary to-custom-success-light"></div>
+            <div class="p-8 lg:p-12">
+                <div class="flex items-center gap-6 md:gap-8 flex-col md:flex-row text-center md:text-left">
+                    <div class="bg-gradient-to-br from-custom-success-dark to-custom-success-light text-white w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-lg transform transition-transform duration-300 hover:scale-110">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">Gestion des Étudiants</h1>
+                        <p class="text-lg text-gray-600 font-normal">Administration et suivi des profils étudiants</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Système de notification -->
         <?php if (!empty($GLOBALS['messageSuccess'])): ?>
-        <div id="successNotification" class="fixed top-4 right-4 z-50 animate__animated animate__fadeIn">
-            <div
-                class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg flex items-center">
+        <div id="successNotification" class="fixed top-4 right-4 z-50 animate-fade-in-down">
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-xl shadow-lg flex items-center">
                 <div class="flex-shrink-0">
                     <i class="fas fa-check-circle text-green-500 text-xl"></i>
                 </div>
@@ -59,8 +212,8 @@ error_log("View - All Etudiants Count: " . count($allEtudiants));
         <?php endif; ?>
 
         <?php if (!empty($GLOBALS['messageErreur'])): ?>
-        <div id="errorNotification" class="fixed top-4 right-4 z-50 animate__animated animate__fadeIn">
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg flex items-center">
+        <div id="errorNotification" class="fixed top-4 right-4 z-50 animate-fade-in-down">
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-xl shadow-lg flex items-center">
                 <div class="flex-shrink-0">
                     <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
                 </div>
@@ -75,91 +228,80 @@ error_log("View - All Etudiants Count: " . count($allEtudiants));
         <?php endif; ?>
 
         <!-- Modal de confirmation de suppression -->
-        <div id="deleteModal" class="fixed inset-0 bg-opacity-50 hidden items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+        <div id="deleteModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50">
+            <div class="modal-content max-w-md w-full mx-4 p-8">
                 <h3 class="text-xl font-semibold text-gray-900 mb-4">Confirmer la suppression</h3>
-                <p class="text-gray-600 mb-6">Êtes-vous sûr de vouloir supprimer les étudiants sélectionnés ? Cette
-                    action est irréversible.</p>
+                <p class="text-gray-600 mb-6">Êtes-vous sûr de vouloir supprimer les étudiants sélectionnés ? Cette action est irréversible.</p>
                 <div class="flex justify-end space-x-4">
-                    <button onclick="closeDeleteModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                    <button onclick="closeDeleteModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium">
                         Annuler
                     </button>
-                    <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-                        Supprimer
+                    <button onclick="confirmDelete()" class="btn-primary text-white">
+                        <i class="fas fa-trash mr-2"></i>Supprimer
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- Add/Edit User Modal -->
-        <div id="userModal"
-            class="fixed inset-0 bg-opacity-50 border border-gray-200 overflow-y-auto h-full w-full z-50 flex <?php echo $showModal ? 'add' : 'hidden'; ?> items-center justify-center modal-transition">
-            <div class="relative p-8 w-full max-w-2xl shadow-2xl rounded-xl bg-white fade-in transform">
-                <div class="absolute top-0 right-0 m-3">
-                    <button onclick="closeUserModal()"
-                        class="text-gray-400 hover:text-gray-600 focus:outline-none btn-icon">
+        <div id="userModal" class="fixed inset-0 modal-backdrop overflow-y-auto h-full w-full z-50 flex <?php echo $showModal ? 'add' : 'hidden'; ?> items-center justify-center">
+            <div class="modal-content p-8 w-full max-w-2xl mx-4 <?php echo $showModal ? 'show' : ''; ?>">
+                <div class="absolute top-0 right-0 m-4">
+                    <button onclick="closeUserModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                         <i class="fas fa-times fa-lg"></i>
                     </button>
                 </div>
-                <div class="flex items-center justify-between mb-6 pb-2 border-b border-gray-200">
-                    <div class="flex">
-                        <div class="bg-green-100 p-1.5 rounded-full mr-3">
-                            <i class="fas fa-user-plus text-green-500 text-sm"></i>
+                
+                <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
+                    <div class="flex items-center">
+                        <div class="bg-custom-success-dark/10 p-3 rounded-xl mr-4">
+                            <i class="fas fa-user-plus text-custom-success-dark text-xl"></i>
                         </div>
-                        <h3 id="userModalTitle" class="text-2xl font-semibold text-gray-700">
+                        <h3 id="userModalTitle" class="text-2xl font-bold text-gray-900">
                             <?php echo isset($etudiant_a_modifier) && $_GET['modalAction']=='edit' ? 'Modifier un étudiant' : 'Ajouter un étudiant'; ?>
                         </h3>
                     </div>
 
                     <?php if ($_GET['modalAction'] === 'edit'): ?>
-                    <div>
-                        <label for="num_etu" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-book text-green-500 mr-2"></i>Numéro étudiant
+                    <div class="text-right">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-id-badge text-custom-primary mr-2"></i>Numéro étudiant
                         </label>
-                        <input type="text" name="num_etu" id="num_etu" required
-                            value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->num_etu) : ''; ?>"
-                            readonly
-                            class="focus:outline-none w-32 px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-gray-100 cursor-not-allowed">
+                        <input type="text" readonly value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->num_etu) : ''; ?>" class="form-input bg-gray-100 cursor-not-allowed w-32">
                     </div>
                     <?php endif; ?>
                 </div>
-                <form id="userForm" class="space-y-4" method="post"
-                    action="?page=gestion_etudiants&action=ajouter_des_etudiants">
-                    <input type="hidden" id="num_etu" name="num_etu"
-                        value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->num_etu) : ''; ?>">
+
+                <form id="userForm" class="space-y-6" method="post" action="?page=gestion_etudiants&action=ajouter_des_etudiants">
+                    <input type="hidden" id="num_etu" name="num_etu" value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->num_etu) : ''; ?>">
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label for="nom_etu" class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-user text-green-500 mr-2"></i>Nom
+                        <div>
+                            <label for="nom_etu" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user text-custom-primary mr-2"></i>Nom *
                             </label>
-                            <input type="text" name="nom_etu" id="nom_etu" required
-                                value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->nom_etu) : ''; ?>"
-                                class="focus:outline-none w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
+                            <input type="text" name="nom_etu" id="nom_etu" required value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->nom_etu) : ''; ?>" class="form-input w-full">
                         </div>
-                        <div class="space-y-2">
-                            <label for="prenom_etu" class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-user text-green-500 mr-2"></i>Prénom
+                        <div>
+                            <label for="prenom_etu" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user text-custom-primary mr-2"></i>Prénom *
                             </label>
-                            <input type="text" name="prenom_etu" id="prenom_etu" required
-                                value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->prenom_etu) : ''; ?>"
-                                class="focus:outline-none w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
+                            <input type="text" name="prenom_etu" id="prenom_etu" required value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->prenom_etu) : ''; ?>" class="form-input w-full">
                         </div>
                     </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label for="email_etu" class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-envelope text-green-500 mr-2"></i>Email
+                        <div>
+                            <label for="email_etu" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-envelope text-custom-primary mr-2"></i>Email *
                             </label>
-                            <input type="email" name="email_etu" id="email_etu" required
-                                value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->email_etu) : ''; ?>"
-                                class="focus:outline-none w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
+                            <input type="email" name="email_etu" id="email_etu" required value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->email_etu) : ''; ?>" class="form-input w-full">
                         </div>
-                        <div class="space-y-2">
-                            <label for="promotion_etu" class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-graduation-cap text-green-500 mr-2"></i>Promotion
+                        <div>
+                            <label for="promotion_etu" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-graduation-cap text-custom-primary mr-2"></i>Promotion *
                             </label>
-                            <select name="promotion_etu" id="promotion_etu" required
-                                class="focus:outline-none w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white transition-all duration-200">
+                            <select name="promotion_etu" id="promotion_etu" required class="form-input w-full">
                                 <option value="">Sélectionner une promotion</option>
                                 <?php
                                 for ($i = 2000; $i <= 2030; $i++) {
@@ -171,45 +313,34 @@ error_log("View - All Etudiants Count: " . count($allEtudiants));
                             </select>
                         </div>
                     </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label for="date_naiss_etu" class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-calendar text-green-500 mr-2"></i>Date de naissance
+                        <div>
+                            <label for="date_naiss_etu" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-calendar text-custom-primary mr-2"></i>Date de naissance *
                             </label>
-                            <input type="date" name="date_naiss_etu" id="date_naiss_etu" required
-                                value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->date_naiss_etu) : ''; ?>"
-                                class="focus:outline-none w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
+                            <input type="date" name="date_naiss_etu" id="date_naiss_etu" required value="<?php echo $etudiant_a_modifier ? htmlspecialchars($etudiant_a_modifier->date_naiss_etu) : ''; ?>" class="form-input w-full">
                         </div>
-                        <div class="space-y-2">
-                            <label for="genre_etu" class="block text-sm font-medium text-gray-700">
-                                <i class="fa-solid fa-venus-mars text-green-500 mr-2"></i>Genre
+                        <div>
+                            <label for="genre_etu" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fa-solid fa-venus-mars text-custom-primary mr-2"></i>Genre *
                             </label>
-                            <select name="genre_etu" id="genre_etu" required
-                                class="focus:outline-none w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white transition-all duration-200">
+                            <select name="genre_etu" id="genre_etu" required class="form-input w-full">
                                 <option value="">Sélectionner un genre</option>
-                                <option value="Femme"
-                                    <?php echo ($etudiant_a_modifier && $etudiant_a_modifier->genre_etu === 'Femme') ? 'selected' : ''; ?>>
-                                    Féminin</option>
-                                <option value="Homme"
-                                    <?php echo ($etudiant_a_modifier && $etudiant_a_modifier->genre_etu === 'Homme') ? 'selected' : ''; ?>>
-                                    Masculin</option>
-                                <option value="Neutre"
-                                    <?php echo ($etudiant_a_modifier && $etudiant_a_modifier->genre_etu === 'Neutre') ? 'selected' : ''; ?>>
-                                    Neutre</option>
+                                <option value="Femme" <?php echo ($etudiant_a_modifier && $etudiant_a_modifier->genre_etu === 'Femme') ? 'selected' : ''; ?>>Féminin</option>
+                                <option value="Homme" <?php echo ($etudiant_a_modifier && $etudiant_a_modifier->genre_etu === 'Homme') ? 'selected' : ''; ?>>Masculin</option>
+                                <option value="Neutre" <?php echo ($etudiant_a_modifier && $etudiant_a_modifier->genre_etu === 'Neutre') ? 'selected' : ''; ?>>Neutre</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="flex justify-between space-x-4 self-end pt-6">
-                        <button type="button" onclick="closeUserModal()"
-                            class="px-6 py-2.5 border border-gray-300 text-sm font-medium rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
+                    <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                        <button type="button" onclick="closeUserModal()" class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200">
                             <i class="fas fa-times mr-2"></i>Annuler
                         </button>
-                        <button type="submit"
-                            name="<?php echo isset($etudiant_a_modifier) && $_GET['modalAction']=='edit' ? 'submit_modifier_etudiant' : 'submit_add_etudiant'; ?>"
-                            class="px-6 py-2.5 text-sm font-medium rounded-lg shadow-sm text-white bg-gradient from-green-600 to-green-800 hover:shadow-lg transition-all duration-200">
-                            <i class="fas fa-save mr-2"></i><span
-                                id="userModalSubmitButton"><?php echo isset($etudiant_a_modifier) && $_GET['modalAction']=='edit' ? 'Modifier' : 'Enregistrer'; ?></span>
+                        <button type="submit" name="<?php echo isset($etudiant_a_modifier) && $_GET['modalAction']=='edit' ? 'submit_modifier_etudiant' : 'submit_add_etudiant'; ?>" class="btn-success text-white">
+                            <i class="fas fa-save mr-2"></i>
+                            <span id="userModalSubmitButton"><?php echo isset($etudiant_a_modifier) && $_GET['modalAction']=='edit' ? 'Modifier' : 'Enregistrer'; ?></span>
                         </button>
                     </div>
                 </form>
@@ -217,36 +348,31 @@ error_log("View - All Etudiants Count: " . count($allEtudiants));
         </div>
 
         <!-- Main Content -->
-        <div class="bg-white shadow-card rounded-lg overflow-hidden border border-gray-200 mb-8">
+        <div class="table-container initial-hidden" style="animation-delay: 0.1s">
             <!-- Dashboard Header -->
-            <div class=" bg-gradient-to-r from-green-600 to-green-800 px-6 py-4 flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white">Gestion des étudiants</h2>
-                <button onclick="openUserModal()"
-                    class="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+            <div class="header-gradient px-8 py-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-white">Liste des Étudiants</h2>
+                <button onclick="openUserModal()" class="btn-success text-white">
                     <i class="fas fa-plus mr-2"></i>Ajouter un étudiant
                 </button>
             </div>
 
             <!-- Action Bar for Table -->
-            <div class="px-6 py-4 flex flex-col sm:flex-row justify-between items-center border-b border-gray-200">
-                <div class="relative w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0">
-                    <input type="text" id="searchInput" placeholder="Rechercher un étudiant..."
-                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
+            <div class="px-8 py-6 flex flex-col sm:flex-row justify-between items-center border-b border-gray-200 gap-4">
+                <div class="relative w-full sm:w-1/2 lg:w-1/3">
+                    <input type="text" id="searchInput" placeholder="Rechercher un étudiant..." class="form-input w-full pl-10">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </span>
                 </div>
-                <div class="flex flex-wrap gap-2 justify-center sm:justify-end">
-                    <button onclick="imprimerListe()"
-                        class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="imprimerListe()" class="btn-primary text-white">
                         <i class="fas fa-print mr-2"></i>Imprimer
                     </button>
-                    <button onclick="exporterListe()"
-                        class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50">
+                    <button onclick="exporterListe()" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-xl shadow transition-all duration-200">
                         <i class="fas fa-file-export mr-2"></i>Exporter
                     </button>
-                    <button id="deleteButton" onclick="openDeleteModal()"
-                        class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                    <button id="deleteButton" onclick="openDeleteModal()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl shadow transition-all duration-200">
                         <i class="fas fa-trash-alt mr-2"></i>Supprimer
                     </button>
                 </div>
@@ -257,48 +383,46 @@ error_log("View - All Etudiants Count: " . count($allEtudiants));
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-4 py-3 text-center">
-                                <input type="checkbox" id="selectAllCheckbox"
-                                    class="form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer">
+                            <th scope="col" class="px-6 py-4 text-center">
+                                <input type="checkbox" id="selectAllCheckbox" class="form-checkbox h-4 w-4 text-custom-primary border-gray-300 rounded focus:ring-custom-primary cursor-pointer">
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <span>Numéro étudiant</span>
-                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                    <i class="fas fa-sort ml-2 text-gray-400"></i>
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <span>Nom</span>
-                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                    <i class="fas fa-sort ml-2 text-gray-400"></i>
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <span>Prénom</span>
-                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                    <i class="fas fa-sort ml-2 text-gray-400"></i>
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <span>Genre</span>
-                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                    <i class="fas fa-sort ml-2 text-gray-400"></i>
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <span>Email</span>
-                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                    <i class="fas fa-sort ml-2 text-gray-400"></i>
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <div class="flex items-center">
                                     <span>Promotion</span>
-                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                    <i class="fas fa-sort ml-2 text-gray-400"></i>
                                 </div>
                             </th>
-                            <th
-                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Actions
                             </th>
                         </tr>
@@ -306,46 +430,42 @@ error_log("View - All Etudiants Count: " . count($allEtudiants));
                     <tbody class="bg-white divide-y divide-gray-200" id="usersTableBody">
                         <?php if (empty($currentPageItems)) : ?>
                         <tr>
-                            <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="9" class="px-6 py-16 text-center text-gray-500">
                                 <div class="flex flex-col items-center">
-                                    <i class="fas fa-users text-gray-300 text-4xl mb-4"></i>
-                                    <p>Aucun étudiant trouvé.</p>
-                                    <p class="text-sm mt-2">Ajoutez de nouveaux étudiants en cliquant sur le bouton
-                                        "Ajouter un étudiant"</p>
+                                    <i class="fas fa-users text-gray-300 text-5xl mb-4"></i>
+                                    <p class="text-lg font-medium">Aucun étudiant trouvé.</p>
+                                    <p class="text-sm mt-2">Ajoutez de nouveaux étudiants en cliquant sur le bouton "Ajouter un étudiant"</p>
                                 </div>
                             </td>
                         </tr>
                         <?php else: ?>
                         <?php foreach ($currentPageItems as $etudiant): ?>
-                        <tr class="table-row-hover">
-                            <td class="px-4 py-4 text-center">
-                                <input type="checkbox" name="selected_ids[]"
-                                    value="<?php echo htmlspecialchars($etudiant->num_etu); ?>"
-                                    class="user-checkbox form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer">
+                        <tr class="hover:bg-gray-50 transition-colors duration-200">
+                            <td class="px-6 py-4 text-center">
+                                <input type="checkbox" name="selected_ids[]" value="<?php echo htmlspecialchars($etudiant->num_etu); ?>" class="user-checkbox form-checkbox h-4 w-4 text-custom-primary border-gray-300 rounded focus:ring-custom-primary cursor-pointer">
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
                                 <?php echo htmlspecialchars($etudiant->num_etu); ?>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                    <?php echo htmlspecialchars($etudiant->nom_etu); ?>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                                <?php echo htmlspecialchars($etudiant->nom_etu); ?>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                    <?php echo htmlspecialchars($etudiant->prenom_etu); ?>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                                <?php echo htmlspecialchars($etudiant->prenom_etu); ?>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">
                                 <?php echo htmlspecialchars($etudiant->genre_etu); ?>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">
                                 <?php echo htmlspecialchars($etudiant->email_etu); ?>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">
                                 <?php echo htmlspecialchars($etudiant->promotion_etu); ?>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <button onclick="openUserModal('<?php echo htmlspecialchars($etudiant->num_etu); ?>')"
-                                    class="text-blue-600 hover:text-blue-900 mr-3">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
+                                <button onclick="openUserModal('<?php echo htmlspecialchars($etudiant->num_etu); ?>')" class="text-custom-primary hover:text-custom-primary-dark mr-3 p-2 hover:bg-custom-primary/10 rounded-lg transition-all duration-200">
+                                    <i class="fas fa-edit"></i>
+                                </button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -356,16 +476,14 @@ error_log("View - All Etudiants Count: " . count($allEtudiants));
 
             <!-- Pagination -->
             <?php if ($totalPages > 1): ?>
-            <div class="bg-white rounded-lg shadow-sm p-4 mt-6">
+            <div class="bg-gray-50 px-6 py-4">
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="text-sm text-gray-500">
-                        Affichage de <?= $startIndex + 1 ?> à <?= min($startIndex + $itemsPerPage, $totalItems) ?> sur
-                        <?= $totalItems ?> entrées
+                        Affichage de <?= $startIndex + 1 ?> à <?= min($startIndex + $itemsPerPage, $totalItems) ?> sur <?= $totalItems ?> entrées
                     </div>
                     <div class="flex flex-wrap justify-center gap-2">
                         <?php if ($currentPage > 1): ?>
-                        <a href="?page=gestion_etudiants&action=ajouter_des_etudiants&p=<?= $currentPage - 1 ?><?= !empty($GLOBALS['searchTerm']) ? '&search=' . urlencode($GLOBALS['searchTerm']) : '' ?>"
-                            class="btn-hover px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        <a href="?page=gestion_etudiants&action=ajouter_des_etudiants&p=<?= $currentPage - 1 ?><?= !empty($GLOBALS['searchTerm']) ? '&search=' . urlencode($GLOBALS['searchTerm']) : '' ?>" class="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
                             <i class="fas fa-chevron-left mr-1"></i>Précédent
                         </a>
                         <?php endif; ?>
@@ -374,34 +492,16 @@ error_log("View - All Etudiants Count: " . count($allEtudiants));
                         $start = max(1, $currentPage - 2);
                         $end = min($totalPages, $currentPage + 2);
                         
-                        if ($start > 1) {
-                            echo '<a href="?page=gestion_etudiants&action=ajouter_des_etudiants&p=1' . (!empty($GLOBALS['searchTerm']) ? '&search=' . urlencode($GLOBALS['searchTerm']) : '') . '" class="btn-hover px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">1</a>';
-                            if ($start > 2) {
-                                echo '<span class="px-3 py-2 text-gray-500">...</span>';
-                            }
-                        }
-                        
                         for ($i = $start; $i <= $end; $i++):
                             $searchParam = !empty($GLOBALS['searchTerm']) ? '&search=' . urlencode($GLOBALS['searchTerm']) : '';
                         ?>
-                        <a href="?page=gestion_etudiants&action=ajouter_des_etudiants&p=<?= $i ?><?= $searchParam ?>"
-                            class="btn-hover px-3 py-2 <?= $i === $currentPage ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' ?> border border-gray-300 rounded-lg text-sm font-medium">
+                        <a href="?page=gestion_etudiants&action=ajouter_des_etudiants&p=<?= $i ?><?= $searchParam ?>" class="px-3 py-2 <?= $i === $currentPage ? 'bg-custom-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50' ?> border border-gray-300 rounded-lg text-sm font-medium">
                             <?= $i ?>
                         </a>
-                        <?php endfor;
-
-                        if ($end < $totalPages) {
-                            if ($end < $totalPages - 1) {
-                                echo '<span class="px-3 py-2 text-gray-500">...</span>';
-                            }
-                            $searchParam = !empty($GLOBALS['searchTerm']) ? '&search=' . urlencode($GLOBALS['searchTerm']) : '';
-                            echo '<a href="?page=gestion_etudiants&action=ajouter_des_etudiants&p=' . $totalPages . $searchParam . '" class="btn-hover px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">' . $totalPages . '</a>';
-                        }
-                        ?>
+                        <?php endfor; ?>
 
                         <?php if ($currentPage < $totalPages): ?>
-                        <a href="?page=gestion_etudiants&action=ajouter_des_etudiants&p=<?= $currentPage + 1 ?><?= !empty($GLOBALS['searchTerm']) ? '&search=' . urlencode($GLOBALS['searchTerm']) : '' ?>"
-                            class="btn-hover px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        <a href="?page=gestion_etudiants&action=ajouter_des_etudiants&p=<?= $currentPage + 1 ?><?= !empty($GLOBALS['searchTerm']) ? '&search=' . urlencode($GLOBALS['searchTerm']) : '' ?>" class="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
                             Suivant<i class="fas fa-chevron-right ml-1"></i>
                         </a>
                         <?php endif; ?>
@@ -410,12 +510,9 @@ error_log("View - All Etudiants Count: " . count($allEtudiants));
             </div>
             <?php endif; ?>
         </div>
-
-        <!-- Footer -->
-        <div class="mt-8 text-center text-gray-500 text-sm">
-            <p>© 2025 Système de Gestion des étudiants. Tous droits réservés.</p>
-        </div>
     </div>
+
+    <!-- Le JavaScript reste inchangé -->
     <script>
     // Initialisation au chargement de la page
     document.addEventListener('DOMContentLoaded', function() {
@@ -538,10 +635,10 @@ error_log("View - All Etudiants Count: " . count($allEtudiants));
         if (filteredEtudiants.length === 0) {
             document.getElementById('usersTableBody').innerHTML = `
                 <tr>
-                    <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+                    <td colspan="9" class="px-6 py-16 text-center text-gray-500">
                         <div class="flex flex-col items-center">
-                            <i class="fas fa-users text-gray-300 text-4xl mb-4"></i>
-                            <p>Aucun étudiant trouvé.</p>
+                            <i class="fas fa-users text-gray-300 text-5xl mb-4"></i>
+                            <p class="text-lg font-medium">Aucun étudiant trouvé.</p>
                             <p class="text-sm mt-2">Essayez avec d'autres termes de recherche</p>
                         </div>
                     </td>

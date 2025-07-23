@@ -589,43 +589,7 @@ class Utilisateur
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    /**
-     * Trouve un utilisateur par son jeton de réinitialisation de mot de passe,
-     * en vérifiant que le jeton n'a pas expiré.
-     *
-     * @param string $token Le jeton de réinitialisation.
-     * @return mixed L'objet utilisateur si trouvé et valide, sinon false.
-     */
-    public function findByResetToken($token)
-    {
-        $sql = "SELECT * FROM utilisateur 
-                WHERE reset_token = :token 
-                AND reset_token_expires_at > NOW()";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([':token' => $token]);
-        return $stmt->fetch(PDO::FETCH_OBJ);
-    }
-
-    /**
-     * Met à jour le mot de passe d'un utilisateur et invalide le jeton de réinitialisation.
-     *
-     * @param int $id_utilisateur L'ID de l'utilisateur.
-     * @param string $hashedPassword Le nouveau mot de passe haché.
-     * @return bool True si la mise à jour a réussi, sinon false.
-     */
-    public function updatePasswordById($id_utilisateur, $hashedPassword)
-    {
-        $sql = "UPDATE utilisateur 
-                SET mdp_utilisateur = :password, 
-                    reset_token = NULL, 
-                    reset_token_expires_at = NULL 
-                WHERE id_utilisateur = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':password' => $hashedPassword,
-            ':id' => $id_utilisateur
-        ]);
-    }
+    
     
     
 }

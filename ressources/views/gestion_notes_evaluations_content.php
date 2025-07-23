@@ -1,10 +1,10 @@
 <?php
 
-$students = $GLOBALS['listeEtudiants'];
-$niveauxEtude = $GLOBALS['niveauxEtude'];
-$selectedNiveau = $GLOBALS['selectedNiveau'];
-$selectedStudent = $GLOBALS['selectedStudent'];
-$studentGrades = $GLOBALS['studentGrades'];
+$students = isset($GLOBALS['listeEtudiants']) ? $GLOBALS['listeEtudiants'] : [];
+$niveauxEtude = isset($GLOBALS['niveauxEtude']) ? $GLOBALS['niveauxEtude'] : [];
+$selectedNiveau = isset($GLOBALS['selectedNiveau']) ? $GLOBALS['selectedNiveau'] : null;
+$selectedStudent = isset($GLOBALS['selectedStudent']) ? $GLOBALS['selectedStudent'] : null;
+$studentGrades = isset($GLOBALS['studentGrades']) ? $GLOBALS['studentGrades'] : [];
 
 ?>
 
@@ -15,38 +15,111 @@ $studentGrades = $GLOBALS['studentGrades'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsable Scolarité | Gestion des Notes</title>
-
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-primary': '#3457cb',
+                        'custom-primary-dark': '#24407a',
+                        'custom-success-dark': '#36865a',
+                        'custom-success-light': '#59bf3d',
+                    },
+                    animation: {
+                        'fade-in-down': 'fadeInDown 0.8s ease-out forwards',
+                        'slide-in-right': 'slideInRight 0.8s ease-out forwards',
+                        'scale-in': 'scaleIn 0.5s ease-out forwards',
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: 100vh;
+    }
+
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(50px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .header-gradient {
+        background: linear-gradient(135deg, #24407a 0%, #3457cb 100%);
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #3457cb 0%, #36865a 50%, #59bf3d 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover::before {
+        opacity: 1;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
+    }
+
+    .initial-hidden {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
     .progress-ring__circle {
         transition: stroke-dashoffset 0.35s;
         transform: rotate(-90deg);
         transform-origin: 50% 50%;
-    }
-
-    .fade-in {
-        animation: fadeIn 0.5s ease-in;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .hover-scale {
-        transition: transform 0.3s ease;
-    }
-
-    .hover-scale:hover {
-        transform: scale(1.03);
     }
 
     .sidebar-item.active {
@@ -176,10 +249,25 @@ $studentGrades = $GLOBALS['studentGrades'];
 </head>
 
 <body class="font-sans antialiased bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
-        <!-- Main content area -->
-        <div class="flex-1 p-4 md:p-6 overflow-y-auto ">
-            <div id="alertContainer">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Header Section -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 mb-8 relative overflow-hidden animate-fade-in-down">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-custom-primary to-custom-success-light"></div>
+            <div class="p-8 lg:p-12">
+                <div class="flex items-center gap-6 md:gap-8 flex-col md:flex-row text-center md:text-left">
+                    <div class="bg-gradient-to-br from-custom-primary to-custom-primary-dark text-white w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-lg transform transition-transform duration-300 hover:scale-110">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">Gestion des Notes</h1>
+                        <p class="text-lg text-gray-600 font-normal">Saisie et suivi des évaluations étudiantes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="alertContainer">
                 <?php if (isset($_SESSION['success'])): ?>
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6"
                     role="alert">
@@ -197,9 +285,9 @@ $studentGrades = $GLOBALS['studentGrades'];
             </div>
 
             <!-- Interface de saisie des notes (optimisée) -->
-            <div id="notes" class="tab-content active max-w-7xl mx-auto">
+            <div id="notes" class="tab-content active">
                 <!-- Header with student search -->
-                <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
+                <div class="card p-8 mb-8 initial-hidden" style="animation-delay: 0.1s">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-gray-800">Gestion des Notes</h2>
                         <div class="flex items-center space-x-4">
@@ -208,9 +296,11 @@ $studentGrades = $GLOBALS['studentGrades'];
                                 <select id="niveauSelect"
                                     class="block w-64 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Sélectionner un niveau</option>
-                                    <?php foreach ($GLOBALS['niveaux'] as $niveau): ?>
+                                    <?php 
+                                    $niveaux = isset($GLOBALS['niveaux']) ? $GLOBALS['niveaux'] : $niveauxEtude;
+                                    foreach ($niveaux as $niveau): ?>
                                     <option value="<?php echo htmlspecialchars($niveau->id_niv_etude); ?>"
-                                        <?php echo $GLOBALS['selectedNiveau'] == $niveau->id_niv_etude ? 'selected' : ''; ?>>
+                                        <?php echo $selectedNiveau == $niveau->id_niv_etude ? 'selected' : ''; ?>>
                                         <?php echo htmlspecialchars($niveau->lib_niv_etude); ?>
                                     </option>
                                     <?php endforeach; ?>
@@ -221,9 +311,11 @@ $studentGrades = $GLOBALS['studentGrades'];
                                 <select id="studentSelect"
                                     class="block w-64 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Sélectionner un étudiant</option>
-                                    <?php foreach ($GLOBALS['etudiants'] as $etudiant): ?>
+                                    <?php 
+                                    $etudiants = isset($GLOBALS['etudiants']) ? $GLOBALS['etudiants'] : [];
+                                    foreach ($etudiants as $etudiant): ?>
                                     <option value="<?php echo htmlspecialchars($etudiant->num_etu); ?>"
-                                        <?php echo isset($GLOBALS['selectedStudent']) && $GLOBALS['selectedStudent']->num_etu == $etudiant->num_etu ? 'selected' : ''; ?>>
+                                        <?php echo isset($selectedStudent) && $selectedStudent->num_etu == $etudiant->num_etu ? 'selected' : ''; ?>>
                                         <?php echo htmlspecialchars($etudiant->nom_etu . ' ' . $etudiant->prenom_etu); ?>
                                     </option>
                                     <?php endforeach; ?>
@@ -233,7 +325,7 @@ $studentGrades = $GLOBALS['studentGrades'];
                     </div>
 
                     <!-- Message initial -->
-                    <?php if (empty($GLOBALS['selectedNiveau'])) { ?>
+                                            <?php if (empty($selectedNiveau)) { ?>
                     <div class="text-center py-12 bg-gray-50 rounded-lg">
                         <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
                             <i class="fas fa-graduation-cap text-2xl text-blue-600"></i>
@@ -246,11 +338,11 @@ $studentGrades = $GLOBALS['studentGrades'];
 
                     <!-- Informations de l'étudiant -->
                     <?php if (!empty($GLOBALS['selectedStudent'])): ?>
-                    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="stat-card p-6 mb-8 initial-hidden" style="animation-delay: 0.2s">
                         <div class="flex items-center space-x-4">
                             <div class="flex-shrink-0">
-                                <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-                                    <i class="fas fa-user text-2xl text-blue-600"></i>
+                                <div class="w-16 h-16 rounded-full bg-custom-primary/10 flex items-center justify-center">
+                                    <i class="fas fa-user text-2xl text-custom-primary"></i>
                                 </div>
                             </div>
                             <div class="flex-1">
@@ -290,8 +382,8 @@ $studentGrades = $GLOBALS['studentGrades'];
                                                 }
                                             }
                                             ?>
-                            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                                <div class="px-6 py-4 bg-blue-500">
+                            <div class="card overflow-hidden initial-hidden" style="animation-delay: 0.3s">
+                                <div class="header-gradient px-8 py-6">
                                     <div class="flex justify-between items-center">
                                         <h3 class="text-lg font-semibold text-white">
                                             <?php echo htmlspecialchars($ue->lib_semestre); ?></h3>
@@ -427,7 +519,7 @@ $studentGrades = $GLOBALS['studentGrades'];
                             ?>
                                     <div class="flex justify-end mt-6">
                                         <button type="submit" name="btn_enregistrer_notes"
-                                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                            class="px-6 py-3 bg-gradient-to-r from-custom-primary to-custom-primary-dark text-white rounded-xl hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:ring-offset-2 transition-all duration-300 font-semibold">
                                             Enregistrer les notes
                                         </button>
                                     </div>
@@ -439,11 +531,11 @@ $studentGrades = $GLOBALS['studentGrades'];
 
                     <!-- Résumé des notes -->
                     <?php if (!empty($GLOBALS['selectedStudent'])): ?>
-                    <div class="bg-blue-50 rounded-lg p-4 mb-6 mt-4">
-                        <div class="flex gap-4 justify-center">
-                            <div class="bg-white rounded-lg p-4 shadow-sm">
-                                <h3 class="text-sm font-medium text-gray-500 mb-1">Moyenne Générale</h3>
-                                <p class="text-2xl font-bold text-blue-600">
+                    <div class="card p-8 mb-8 mt-8 initial-hidden" style="animation-delay: 0.4s">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                            <div class="stat-card p-6 text-center">
+                                <h3 class="text-sm font-medium text-gray-500 mb-2">Moyenne Générale</h3>
+                                <p class="text-3xl font-bold text-custom-primary mb-1">
                                     <?php
                                     $totalNotes = 0;
                                     $totalCredits = 0;
@@ -455,9 +547,9 @@ $studentGrades = $GLOBALS['studentGrades'];
                                     ?>
                                 </p>
                             </div>
-                            <div class="bg-white rounded-lg p-4 shadow-sm">
-                                <h3 class="text-sm font-medium text-gray-500 mb-1">Moyenne UE majeures</h3>
-                                <p class="text-2xl font-bold text-blue-600">
+                            <div class="stat-card p-6 text-center">
+                                <h3 class="text-sm font-medium text-gray-500 mb-2">Moyenne UE majeures</h3>
+                                <p class="text-3xl font-bold text-custom-success-dark mb-1">
                                     <?php
                                     $sumMaj = $credMaj = 0;
                                     foreach ($GLOBALS['studentGrades'] as $grade) {
@@ -471,9 +563,9 @@ $studentGrades = $GLOBALS['studentGrades'];
                                     ?>
                                 </p>
                             </div>
-                            <div class="bg-white rounded-lg p-4 shadow-sm">
-                                <h3 class="text-sm font-medium text-gray-500 mb-1">Moyenne UE mineures</h3>
-                                <p class="text-2xl font-bold text-blue-600">
+                            <div class="stat-card p-6 text-center">
+                                <h3 class="text-sm font-medium text-gray-500 mb-2">Moyenne UE mineures</h3>
+                                <p class="text-3xl font-bold text-yellow-600 mb-1">
                                     <?php
                                     $sumMin = $credMin = 0;
                                     foreach ($GLOBALS['studentGrades'] as $grade) {

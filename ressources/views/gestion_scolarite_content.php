@@ -1,8 +1,8 @@
 <?php
 // Initialisation des variables avec des valeurs par défaut
 $etudiantsInscrits = isset($GLOBALS['etudiantsInscrits']) ? $GLOBALS['etudiantsInscrits'] : [];
-$listeAllEtudiant = $GLOBALS['listeAllEtudiant'];
-$allVersement = $GLOBALS['listeVersement'];
+$listeAllEtudiant = isset($GLOBALS['listeAllEtudiant']) ? $GLOBALS['listeAllEtudiant'] : [];
+$allVersement = isset($GLOBALS['listeVersement']) ? $GLOBALS['listeVersement'] : [];
 
 // Configuration de la pagination
 $items_par_page = 10; // Nombre d'éléments par page
@@ -42,9 +42,105 @@ $pourcentagePending = count($listeAllEtudiant) > 0 ? round(($totalEtudiants / co
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion Scolarité | Scolarité</title>
-
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-primary': '#3457cb',
+                        'custom-primary-dark': '#24407a',
+                        'custom-success-dark': '#36865a',
+                        'custom-success-light': '#59bf3d',
+                    },
+                    animation: {
+                        'fade-in-down': 'fadeInDown 0.8s ease-out forwards',
+                        'slide-in-right': 'slideInRight 0.8s ease-out forwards',
+                        'scale-in': 'scaleIn 0.5s ease-out forwards',
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: 100vh;
+    }
+
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(50px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #3457cb 0%, #36865a 50%, #59bf3d 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover::before {
+        opacity: 1;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
+    }
+
+    .card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .header-gradient {
+        background: linear-gradient(135deg, #24407a 0%, #3457cb 100%);
+    }
+
+    .initial-hidden {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
     .fade-in {
         animation: fadeIn 0.5s ease-in;
     }
@@ -121,60 +217,74 @@ $pourcentagePending = count($listeAllEtudiant) > 0 ? round(($totalEtudiants / co
         </div>
     </div>
     <?php endif; ?>
-    <div class="flex h-screen overflow-hidden">
-        <!-- Main content area -->
-        <div class="flex-1 p-4 md:p-6 overflow-y-auto">
-            <div class="max-w-7xl mx-auto">
-                <!-- Header -->
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Header Section -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 mb-8 relative overflow-hidden animate-fade-in-down">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-custom-primary to-custom-success-light"></div>
+            <div class="p-8 lg:p-12">
+                <div class="flex items-center gap-6 md:gap-8 flex-col md:flex-row text-center md:text-left">
+                    <div class="bg-gradient-to-br from-custom-primary to-custom-primary-dark text-white w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-lg transform transition-transform duration-300 hover:scale-110">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800">Gestion des paiements</h1>
-                        <p class="text-gray-600">Suivi des paiements de scolarité</p>
-                    </div>
-
-                </div>
-
-                <!-- Payment status cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div class="bg-white p-4 rounded-lg shadow-sm hover-scale">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Paiements complets</p>
-                                <p class="text-2xl font-bold text-gray-800"><?php echo $complete; ?></p>
-                                <p class="text-xs text-gray-500"><?php echo $pourcentageComplete; ?>% des étudiants</p>
-                            </div>
-                            <div class="p-3 rounded-full bg-green-100 text-green-500">
-                                <i class="fas fa-check-circle text-xl"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-4 rounded-lg shadow-sm hover-scale">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Paiements partiels</p>
-                                <p class="text-2xl font-bold text-gray-800"><?php echo $partial; ?></p>
-                                <p class="text-xs text-gray-500"><?php echo $pourcentagePartial; ?>% des étudiants</p>
-                            </div>
-                            <div class="p-3 rounded-full bg-yellow-100 text-yellow-500">
-                                <i class="fas fa-exclamation-circle text-xl"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-4 rounded-lg shadow-sm hover-scale">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Etudiants inscrits</p>
-                                <p class="text-2xl font-bold text-gray-800"><?php echo $totalEtudiants; ?></p>
-                                <p class="text-xs text-gray-500"><?php echo $pourcentagePending; ?>% des étudiants</p>
-                            </div>
-                            <div class="p-3 rounded-full bg-red-100 text-red-500">
-                                <i class="fas fa-times-circle text-xl"></i>
-                            </div>
-                        </div>
+                        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">Gestion des Paiements</h1>
+                        <p class="text-lg text-gray-600 font-normal">Suivi et gestion des paiements de scolarité</p>
                     </div>
                 </div>
+            </div>
+        </div>
+
+         <!-- Payment status cards -->
+         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+             <div class="stat-card p-6 animate-slide-in-right" style="animation-delay: 0.1s">
+                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-custom-success-dark to-custom-success-light"></div>
+                 <div class="flex items-center gap-4">
+                     <div class="w-14 h-14 bg-custom-success-dark/10 text-custom-success-dark rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                         <i class="fas fa-check-circle"></i>
+                     </div>
+                     <div>
+                         <h3 class="text-3xl font-bold text-custom-success-dark mb-1"><?php echo $complete; ?></h3>
+                         <p class="text-sm font-semibold text-gray-600">Paiements complets</p>
+                         <p class="text-xs text-custom-success-dark font-medium mt-1">
+                             <i class="fas fa-percentage mr-1"></i><?php echo $pourcentageComplete; ?>% des étudiants
+                         </p>
+                     </div>
+                 </div>
+             </div>
+
+             <div class="stat-card p-6 animate-slide-in-right" style="animation-delay: 0.2s">
+                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-500 to-orange-500"></div>
+                 <div class="flex items-center gap-4">
+                     <div class="w-14 h-14 bg-yellow-500/10 text-yellow-600 rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                         <i class="fas fa-exclamation-circle"></i>
+                     </div>
+                     <div>
+                         <h3 class="text-3xl font-bold text-yellow-600 mb-1"><?php echo $partial; ?></h3>
+                         <p class="text-sm font-semibold text-gray-600">Paiements partiels</p>
+                         <p class="text-xs text-yellow-600 font-medium mt-1">
+                             <i class="fas fa-percentage mr-1"></i><?php echo $pourcentagePartial; ?>% des étudiants
+                         </p>
+                     </div>
+                 </div>
+             </div>
+
+             <div class="stat-card p-6 animate-slide-in-right" style="animation-delay: 0.3s">
+                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-custom-primary to-custom-primary-dark"></div>
+                 <div class="flex items-center gap-4">
+                     <div class="w-14 h-14 bg-custom-primary/10 text-custom-primary rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                         <i class="fas fa-users"></i>
+                     </div>
+                     <div>
+                         <h3 class="text-3xl font-bold text-custom-primary mb-1"><?php echo $totalEtudiants; ?></h3>
+                         <p class="text-sm font-semibold text-gray-600">Étudiants inscrits</p>
+                         <p class="text-xs text-custom-primary font-medium mt-1">
+                             <i class="fas fa-chart-line mr-1"></i><?php echo $pourcentagePending; ?>% du total
+                         </p>
+                     </div>
+                 </div>
+             </div>
+         </div>
 
                 <!-- Payment form -->
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden">

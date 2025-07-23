@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mot de Passe Oublié - EduX</title>
+    <title>Mot de Passe Oublié - UniValid</title>
+    <link rel="shortcut icon" href="./images/logo.png" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
     tailwind.config = {
@@ -321,6 +322,7 @@
         const emailInput = document.getElementById('resetEmail');
         const email = emailInput.value;
 
+        // Validate email
         if (!email || !isValidEmail(email)) {
             shakeForm();
             return;
@@ -328,37 +330,18 @@
 
         // Loading state
         submitBtn.innerHTML = `
-        <div class="flex items-center justify-center space-x-2">
-            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            <span>Envoi en cours...</span>
-        </div>
-    `;
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                    <span>Envoi en cours...</span>
+                </div>
+            `;
+
         submitBtn.disabled = true;
 
-        // VRAI APPEL API
-        fetch('api.php', { // Assurez-vous que le chemin est correct
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: email })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showSuccessState();
-                } else {
-                    alert('Erreur: ' + data.message); // Affichez une erreur plus jolie si vous le souhaitez
-                    submitBtn.innerHTML = 'Envoyer le Lien de Réinitialisation';
-                    submitBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Une erreur de communication est survenue.');
-                submitBtn.innerHTML = 'Envoyer le Lien de Réinitialisation';
-                submitBtn.disabled = false;
-            });
+        // Simulate API call
+        setTimeout(() => {
+            showSuccessState();
+        }, 2000);
     });
 
     function isValidEmail(email) {

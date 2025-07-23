@@ -306,6 +306,24 @@ class RapportEtudiant {
         }
     }
 
+
+    public function getRapportsByEvaluations() {
+        try {
+            $stmt = $this->pdo->prepare("
+            SELECT r.*, e.nom_etu, e.prenom_etu, e.email_etu 
+            FROM rapport_etudiants r
+            JOIN etudiants e ON r.num_etu = e.num_etu
+            WHERE r.statut_rapport = 'valide' OR r.statut_rapport = 'rejete'
+            ORDER BY r.date_rapport DESC
+        ");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            error_log("Erreur récupération rapports par statut: " . $e->getMessage());
+            return [];
+        }
+    }
+
     public function ajouterEvaluation($id_rapport, $id_evaluateur, $type_evaluateur, $commentaire, $note = null) {
         try {
             $stmt = $this->pdo->prepare("

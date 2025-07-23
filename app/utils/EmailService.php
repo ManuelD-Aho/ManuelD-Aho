@@ -24,7 +24,7 @@ class EmailService {
             $this->mailer->SMTPAuth = true;
             $this->mailer->Username = $config['smtp']['username'];
             $this->mailer->Password = $config['smtp']['password'];
-            $this->mailer->SMTPSecure = $config['smtp']['encryption'];
+            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $this->mailer->Port = $config['smtp']['port'];
             $this->mailer->CharSet = 'UTF-8';
 

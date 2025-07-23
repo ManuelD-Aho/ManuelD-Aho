@@ -1,3 +1,41 @@
+<?php
+require_once __DIR__ . '/../../app/config/database.php';
+require_once __DIR__ . '/../../app/Models/CompteRendu.php';
+
+// Connexion à la base
+$pdo = Database::getConnection();
+$rapportModel = new RapportEtudiant($pdo);
+
+// Récupérer tous les rapports validés ou rejetés
+$rapportsValides = $rapportModel->getRapportsByStatut('valide');
+$rapportsRejetes = $rapportModel->getRapportsByStatut('rejete');
+$rapports = array_merge($rapportsValides, $rapportsRejetes);
+$GLOBALS['rapports'] = $rapports;
+
+// Gestion de la soumission du compte-rendu
+$messageSuccess = '';
+$messageErreur = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finaliser_compte_rendu'])) {
+    $titre = $_POST['titre_compte_rendu'] ?? '';
+    $date = $_POST['date_compte_rendu'] ?? date('Y-m-d');
+    $contenu = $_POST['contenu_compte_rendu'] ?? '';
+    $rapports_ids = $_POST['rapports_selectionnes'] ?? [];
+    $num_etu = $_SESSION['num_etu'] ?? null; // À adapter selon votre logique d'utilisateur
+    $chemin_pdf = null; // À générer si vous faites un export PDF
+
+    if ($titre && $contenu && !empty($rapports_ids) && $num_etu) {
+        $idCR = CompteRendu::creer($num_etu, $titre, $contenu, $chemin_pdf, $date, $rapports_ids);
+        if ($idCR) {
+            $messageSuccess = "Compte-rendu créé avec succès !";
+        } else {
+            $messageErreur = "Erreur lors de la création du compte-rendu.";
+        }
+    } else {
+        $messageErreur = "Veuillez remplir tous les champs et sélectionner au moins un rapport.";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -66,69 +104,66 @@
 
                     <!-- Liste des rapports -->
                     <div class="space-y-2 max-h-96 overflow-y-auto" id="listeRapports">
-                        <!-- Rapport 1 -->
-                        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors rapport-item" data-statut="valide">
-                            <div class="flex items-start gap-3">
-                                <input type="checkbox" class="mt-1 h-4 w-4 text-custom-primary focus:ring-custom-primary border-gray-300 rounded" onchange="toggleRapport(this)" data-rapport-id="1">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">Validé</span>
-                                        <span class="text-xs text-gray-500">#RPT-2024-001</span>
+                        <?php if (!empty($rapports)): ?>
+                            <?php foreach ($rapports as $rapport):
+                                $statut = isset($rapport->statut_rapport) ? strtolower(trim($rapport->statut_rapport)) : 'inconnu';
+                                $isValide = ($statut === 'valide');
+                                $statutLabel = $isValide ? 'Valide' : ($statut === 'rejete' ? 'Rejete' : 'En attente');
+                                $statutColor = $isValide ? 'bg-green-100 text-green-800' : ($statut === 'rejete' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800');
+                                $id_rapport = isset($rapport->id_rapport) ? $rapport->id_rapport : (isset($rapport->id) ? $rapport->id : 0);
+                                $reference = $id_rapport ? '#RPT-' . str_pad($id_rapport, 4, '0', STR_PAD_LEFT) : '#RPT-0000';
+                                $titre = '';
+                                if (isset($rapport->nom_rapport)) $titre = $rapport->nom_rapport;
+                                elseif (isset($rapport->titre)) $titre = $rapport->titre;
+                                elseif (isset($rapport->title)) $titre = $rapport->title;
+                                else $titre = 'Titre non disponible';
+                                $titre = htmlspecialchars($titre);
+                                $nom_etu = isset($rapport->nom_etu) ? $rapport->nom_etu : '';
+                                $prenom_etu = isset($rapport->prenom_etu) ? $rapport->prenom_etu : '';
+                                $auteur = htmlspecialchars(trim($nom_etu . ' ' . $prenom_etu));
+                                if (empty(trim($auteur))) $auteur = 'Auteur non disponible';
+                                $date = '';
+                                if (isset($rapport->date_rapport)) {
+                                    $date = date('d/m/Y', strtotime($rapport->date_rapport));
+                                } elseif (isset($rapport->date_creation)) {
+                                    $date = date('d/m/Y', strtotime($rapport->date_creation));
+                                } else {
+                                    $date = 'Date non disponible';
+                                }
+                            ?>
+                                <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors rapport-item"
+                                    data-statut="<?= $isValide ? 'valide' : 'rejete' ?>"
+                                    data-titre="<?= strtolower($titre) ?>"
+                                    data-auteur="<?= strtolower($auteur) ?>"
+                                    data-reference="<?= strtolower($reference) ?>">
+                                    <div class="flex items-start gap-3">
+                                        <input type="checkbox"
+                                            class="mt-1 h-4 w-4 text-custom-primary focus:ring-custom-primary border-gray-300 rounded"
+                                            onchange="toggleRapport(this)"
+                                            data-rapport-id="<?= $id_rapport ?>"
+                                            name="rapports_selectionnes[]"
+                                            value="<?= $id_rapport ?>">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="<?= $statutColor ?> text-xs px-2 py-1 rounded-full font-medium"><?= $statutLabel ?></span>
+                                                <span class="text-xs text-gray-500"><?= $reference ?></span>
+                                            </div>
+                                            <h4 class="text-sm font-medium text-gray-900 truncate"><?= $titre ?></h4>
+                                            <p class="text-xs text-gray-600 mt-1">Soumis par: <?= $auteur ?></p>
+                                            <p class="text-xs text-gray-500">Date: <?= $date ?></p>
+                                        </div>
                                     </div>
-                                    <h4 class="text-sm font-medium text-gray-900 truncate">Rapport d'activité mensuel - Janvier 2024</h4>
-                                    <p class="text-xs text-gray-600 mt-1">Soumis par: Jean Dupont</p>
-                                    <p class="text-xs text-gray-500">Date: 15/01/2024</p>
                                 </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <?php // Debug temporaire
+                            // echo '<pre>'; print_r($rapports); echo '</pre>'; ?>
+                            <div class="text-center py-8">
+                                <i class="fas fa-inbox text-gray-400 text-4xl mb-3"></i>
+                                <p class="text-gray-500 text-sm">Aucun rapport disponible pour le moment</p>
+                                <p class="text-gray-400 text-xs mt-1">Les rapports apparaîtront ici une fois qu'ils auront été soumis et évalués</p>
                             </div>
-                        </div>
-
-                        <!-- Rapport 2 -->
-                        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors rapport-item" data-statut="rejete">
-                            <div class="flex items-start gap-3">
-                                <input type="checkbox" class="mt-1 h-4 w-4 text-custom-primary focus:ring-custom-primary border-gray-300 rounded" onchange="toggleRapport(this)" data-rapport-id="2">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-medium">Rejeté</span>
-                                        <span class="text-xs text-gray-500">#RPT-2024-002</span>
-                                    </div>
-                                    <h4 class="text-sm font-medium text-gray-900 truncate">Rapport financier Q1</h4>
-                                    <p class="text-xs text-gray-600 mt-1">Soumis par: Marie Martin</p>
-                                    <p class="text-xs text-gray-500">Date: 28/01/2024</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Rapport 3 -->
-                        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors rapport-item" data-statut="valide">
-                            <div class="flex items-start gap-3">
-                                <input type="checkbox" class="mt-1 h-4 w-4 text-custom-primary focus:ring-custom-primary border-gray-300 rounded" onchange="toggleRapport(this)" data-rapport-id="3">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">Validé</span>
-                                        <span class="text-xs text-gray-500">#RPT-2024-003</span>
-                                    </div>
-                                    <h4 class="text-sm font-medium text-gray-900 truncate">Analyse des performances équipe A</h4>
-                                    <p class="text-xs text-gray-600 mt-1">Soumis par: Pierre Leblanc</p>
-                                    <p class="text-xs text-gray-500">Date: 05/02/2024</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Rapport 4 -->
-                        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors rapport-item" data-statut="rejete">
-                            <div class="flex items-start gap-3">
-                                <input type="checkbox" class="mt-1 h-4 w-4 text-custom-primary focus:ring-custom-primary border-gray-300 rounded" onchange="toggleRapport(this)" data-rapport-id="4">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-medium">Rejeté</span>
-                                        <span class="text-xs text-gray-500">#RPT-2024-004</span>
-                                    </div>
-                                    <h4 class="text-sm font-medium text-gray-900 truncate">Rapport de projet XYZ</h4>
-                                    <p class="text-xs text-gray-600 mt-1">Soumis par: Sophie Moreau</p>
-                                    <p class="text-xs text-gray-500">Date: 12/02/2024</p>
-                                </div>
-                            </div>
-                        </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Compteur de sélection -->
@@ -277,7 +312,7 @@ Date de rédaction: {DATE}`;
 
             rapportsSelectionnes.forEach(rapport => {
                 rapportsListe += `- ${rapport.titre} (#${rapport.reference}) - ${rapport.statut}\n`;
-                if (rapport.statut === 'Validé') nombreValides++;
+                if (rapport.statut === 'Valide') nombreValides++;
                 else nombreRejetes++;
             });
 
@@ -339,7 +374,7 @@ Date de rédaction: {DATE}`;
             } else {
                 let html = '<div class="space-y-2">';
                 rapportsSelectionnes.forEach(rapport => {
-                    const couleur = rapport.statut === 'Validé' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                    const couleur = rapport.statut === 'Valide' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
                     html += `
                         <div class="flex items-center gap-2 text-sm">
                             <span class="${couleur} px-2 py-1 rounded-full text-xs font-medium">${rapport.statut}</span>

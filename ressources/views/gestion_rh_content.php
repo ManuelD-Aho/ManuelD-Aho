@@ -36,20 +36,21 @@ $enseignant_edit = $enseignant_a_modifier ?? null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Ressources Humaines</title>
+    <title>Gestion RH | Univalid</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'primary': '#157A6E', // Vert institutionnel
-                        'primary-dark': '#0B3C32',
-                        'secondary': '#2F53CD',
-                        'secondary-light': '#60A5FA',
-                        'accent': '#F6C700', // Jaune/Or pour le contraste
-                        'yellow-custom': '#FFD700',
-                        'yellow-bright': '#FFEB3B'
+                        'primary': '#24407a',
+                        'primary-light': '#3457cb', 
+                        'secondary': '#36865a',
+                        'secondary-light': '#59bf3d',
+                        'accent': '#F6C700',
+                        'warning': '#f59e0b',
+                        'danger': '#ef4444',
                     },
                     animation: {
                         'float': 'float 3s ease-in-out infinite',
@@ -63,1091 +64,1127 @@ $enseignant_edit = $enseignant_a_modifier ?? null;
         }
     </script>
     <style>
-        /* General Animations */
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+        }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(50px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         @keyframes scaleIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
 
-        /* Custom Styles for this page */
-        .tab-button-active {
-            background-color: #157A6E;
-            /* primary */
-            color: #ffffff;
-            box-shadow: 0 4px 10px rgba(21, 122, 110, 0.3);
-            /* Shadow for active tab */
+        .card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3457cb 0%, #36865a 50%, #59bf3d 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3457cb 0%, #36865a 50%, #59bf3d 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #3457cb 0%, #24407a 100%);
+            color: white;
+            border-color: #3457cb;
+            box-shadow: 0 4px 12px rgba(52, 87, 203, 0.3);
             transform: translateY(-2px);
-            /* Slight lift */
         }
 
-        .tab-button-inactive {
-            background-color: #f3f4f6;
-            /* gray-100 */
-            color: #4b5563;
-            /* gray-700 */
-            border: 1px solid #e5e7eb;
-            /* gray-200 */
+        .tab-button:not(.active) {
+            background: white;
+            color: #64748b;
         }
 
-        .tab-button-inactive:hover {
-            background-color: #e0f2f1;
-            /* primary/10 */
-            color: #157A6E;
-            /* primary */
+        .tab-button:not(.active):hover {
+            background: rgba(52, 87, 203, 0.05);
+            color: #3457cb;
+            border-color: rgba(52, 87, 203, 0.2);
+            transform: translateY(-1px);
         }
 
-        /* Modal Styles */
         .modal-overlay {
             display: none;
-            /* Hidden by default */
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            /* Darker overlay */
+            background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(8px);
-            /* Stronger blur */
             z-index: 999;
-            /* Below sidebars/notifications, above main content */
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.3s ease-out forwards;
+            animation: fadeInDown 0.3s ease-out forwards;
         }
 
         .modal-container {
-            background-color: #fff;
-            padding: 3rem;
-            /* More padding */
-            border-radius: 1.5rem;
-            /* More rounded */
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-            /* Stronger shadow */
+            background: white;
+            backdrop-filter: blur(20px);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             width: 95%;
-            max-width: 650px;
-            /* Wider modal */
-            animation: scaleIn 0.4s ease-out forwards;
+            max-width: 700px;
+            animation: scaleIn 0.5s ease-out forwards;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3457cb 0%, #36865a 50%, #59bf3d 100%);
+            border-radius: 24px 24px 0 0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3457cb 0%, #24407a 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(52, 87, 203, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(52, 87, 203, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #36865a 0%, #59bf3d 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(54, 134, 90, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(54, 134, 90, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-gray {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-gray:hover {
+            background: white;
+            border-color: rgba(52, 87, 203, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3457cb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 87, 203, 0.1);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .table-row {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table-row:hover {
+            background: rgba(52, 87, 203, 0.02);
+            transform: scale(1.01);
+        }
+
+        .search-container {
             position: relative;
         }
 
-        .modal-close-btn {
+        .search-input {
+            padding-left: 48px;
+        }
+
+        .search-icon {
             position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            background: none;
-            border: none;
-            font-size: 2rem;
-            /* Larger icon */
-            color: #9ca3af;
-            /* gray-400 */
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+
+        .notification {
+            padding: 16px 20px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            border: 1px solid;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.1);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, rgba(54, 134, 90, 0.1) 0%, rgba(89, 191, 61, 0.1) 100%);
+            border-color: rgba(54, 134, 90, 0.2);
+            color: #36865a;
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
             cursor: pointer;
-            transition: color 0.3s ease;
+            border: none;
         }
 
-        .modal-close-btn:hover {
-            color: #6b7280;
-            /* gray-500 */
+        .action-btn:hover {
+            transform: scale(1.1);
         }
 
-        /* Custom Scrollbar for overflow elements */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .action-btn.edit {
+            background: rgba(52, 87, 203, 0.1);
+            color: #3457cb;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
+        .action-btn.edit:hover {
+            background: rgba(52, 87, 203, 0.2);
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            /* gray-400 */
-            border-radius: 10px;
+        .action-btn.delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a0aec0;
-            /* gray-500 */
+        .action-btn.delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-custom:checked {
+            background: #3457cb;
+            border-color: #3457cb;
+        }
+
+        .header-gradient {
+            background: linear-gradient(135deg, #24407a 0%, #3457cb 100%);
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
-<body class="bg-gray-100 font-sans antialiased text-gray-800">
-    <div class="min-h-screen flex flex-col">
-        <main class="flex-grow container mx-auto px-4 py-5">
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-            <!-- Système d'onglets -->
-            <div class="mb-8">
-                <div class="border-b border-gray-300">
-                    <nav class="-mb-px flex space-x-4" aria-label="Tabs">
-                        <a href="?page=gestion_rh&tab=pers_admin"
-                            class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm hover:text-gray-700
-                                  <?= ($activeTab === 'pers_admin') ? 'border-green-500 text-green-600 bg-green-50' : 'border-transparent hover:border-gray-300' ?>">
-                            <i class="fas fa-users-cog mr-2"></i> Personnel administratif
-                        </a>
-                        <a href="?page=gestion_rh&tab=enseignant"
-                            class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm hover:text-gray-700
-                                  <?= ($activeTab === 'enseignant') ? 'border-green-500 text-green-600 bg-green-50' : 'border-transparent hover:border-gray-300' ?>">
-                            <i class="fas fa-user-tag mr-2"></i> Enseignants
-                        </a>
-                    </nav>
+        <!-- Header Section -->
+        <div class="header bg-white rounded-3xl p-8 lg:p-12 mb-8 shadow-xl relative overflow-hidden animate-fade-in-down">
+            <div class="flex items-center gap-6 md:gap-8 flex-col md:flex-row text-center md:text-left">
+                <div class="header-icon bg-gradient-to-br from-primary to-primary-light text-white w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-lg">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <div class="header-text">
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">Gestion des Ressources Humaines</h1>
+                    <p class="text-lg text-gray-600 font-normal">Administration du personnel et des enseignants</p>
                 </div>
             </div>
+        </div>
 
-            <!-- Contenu des onglets -->
-            <div>
-                <!-- Onglet Personnel administratif -->
-                <?php if ($activeTab === 'pers_admin'): ?>
-                <div id="tab_pers_admin" class="flex flex-col">
-                    <?php if (!empty($messageSuccess)): ?>
-                    <div id="success-message"
-                        class="bg-green-50 border-l-4 border-green-400 text-green-700 p-4 rounded-md shadow-sm mb-6"
-                        role="alert">
-                        <p><?= htmlspecialchars($messageSuccess) ?></p>
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card animate-slide-in-right" style="animation-delay: 0.1s">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center text-2xl">
+                        <i class="fas fa-users-cog"></i>
                     </div>
-                    <?php endif; ?>
-                    <?php if (!empty($messageErreur)): ?>
-                    <div id="error-message"
-                        class="bg-red-50 border-l-4 border-red-400 text-red-700 p-4 rounded-md shadow-sm mb-6"
-                        role="alert">
-                        <p><?= htmlspecialchars($messageErreur) ?></p>
+                    <div>
+                        <h3 class="text-3xl font-bold text-primary mb-1"><?php echo count($personnel_admin); ?></h3>
+                        <p class="text-sm font-semibold text-gray-600">Personnel Admin</p>
+                        <p class="text-xs text-green-600 font-medium">
+                            <i class="fas fa-arrow-up mr-1"></i>Actif
+                        </p>
                     </div>
-                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <div class="stat-card animate-slide-in-right" style="animation-delay: 0.2s">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center text-2xl">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-secondary mb-1"><?php echo count($enseignants); ?></h3>
+                        <p class="text-sm font-semibold text-gray-600">Enseignants</p>
+                        <p class="text-xs text-green-600 font-medium">
+                            <i class="fas fa-arrow-up mr-1"></i>Actif
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card animate-slide-in-right" style="animation-delay: 0.3s">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-warning/10 text-warning rounded-xl flex items-center justify-center text-2xl">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-warning mb-1"><?php echo count($listeGrades); ?></h3>
+                        <p class="text-sm font-semibold text-gray-600">Grades</p>
+                        <p class="text-xs text-blue-600 font-medium">
+                            <i class="fas fa-info-circle mr-1"></i>Disponibles
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card animate-slide-in-right" style="animation-delay: 0.4s">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-purple-500/10 text-purple-600 rounded-xl flex items-center justify-center text-2xl">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-purple-600 mb-1"><?php echo count($listeFonctions); ?></h3>
+                        <p class="text-sm font-semibold text-gray-600">Fonctions</p>
+                        <p class="text-xs text-blue-600 font-medium">
+                            <i class="fas fa-info-circle mr-1"></i>Disponibles
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-xl font-semibold text-gray-700">Gestion du personnel administratif</h3>
-                        <a href="?page=gestion_rh&tab=pers_admin&action=add" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm
-                                  transition duration-150 ease-in-out flex items-center">
-                            <i class="fas fa-plus mr-2"></i> Ajouter un personnel
-                        </a>
-                    </div>
-                    <!-- Action Bar for Table -->
-                    <div
-                        class="px-6 py-4 flex flex-col sm:flex-row justify-between items-center border-b border-gray-200">
-                        <div class="relative w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0">
-                            <input type="text" id="searchInput" placeholder="Rechercher un personnel..."
-                                class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <i class="fas fa-search text-gray-400"></i>
-                            </span>
+        <!-- Navigation tabs -->
+        <div class="mb-8 animate-fade-in-down">
+            <div class="flex justify-center">
+                <nav class="flex space-x-4 p-2 bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-lg">
+                    <a href="?page=gestion_rh&tab=pers_admin"
+                        class="tab-button <?= ($activeTab === 'pers_admin') ? 'active' : '' ?>">
+                        <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                            <i class="fas fa-users-cog"></i>
                         </div>
-                        <div class="flex flex-wrap gap-2 justify-center sm:justify-end">
-                            <button type="button" onclick="printTable('pers_admin')"
-                                class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                                <i class="fas fa-print mr-2"></i>Imprimer
+                        <span>Personnel Administratif</span>
+                    </a>
+                    <a href="?page=gestion_rh&tab=enseignant"
+                        class="tab-button <?= ($activeTab === 'enseignant') ? 'active' : '' ?>">
+                        <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <span>Enseignants</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <?php if ($messageSuccess): ?>
+            <div class="notification success animate-fade-in-down">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-3 text-lg"></i>
+                    <span class="font-semibold"><?= htmlspecialchars($messageSuccess) ?></span>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($messageErreur): ?>
+            <div class="notification error animate-fade-in-down">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle mr-3 text-lg"></i>
+                    <span class="font-semibold"><?= htmlspecialchars($messageErreur) ?></span>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- Contenu des onglets -->
+        <div class="animate-scale-in">
+            <!-- Onglet Personnel administratif -->
+            <div id="tab_pers_admin" class="<?= $activeTab === 'pers_admin' ? '' : 'hidden' ?>">
+                <!-- Header section avec bouton -->
+                <div class="card p-8 mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                        <div>
+                            <h2 class="text-3xl font-bold text-primary mb-2">Personnel Administratif</h2>
+                            <p class="text-gray-600">Gérez efficacement votre équipe administrative</p>
+                        </div>
+                        <button onclick="showAddModal('pers_admin')" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            <span>Nouveau Personnel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Barre d'actions -->
+                <div class="card p-6 mb-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                        <div class="search-container flex-1 max-w-md">
+                            <input type="text" id="searchInputAdmin" placeholder="Rechercher un personnel..."
+                                class="form-input search-input">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="printTable('admin-table')" class="btn btn-primary">
+                                <i class="fas fa-print"></i>
+                                <span>Imprimer</span>
                             </button>
-                            <button type="button" onclick="exportToExcel('pers_admin')"
-                                class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50">
-                                <i class="fas fa-file-export mr-2"></i>Exporter
+                            <button onclick="exportToExcel('admin-table')" class="btn btn-warning">
+                                <i class="fas fa-download"></i>
+                                <span>Exporter</span>
                             </button>
-                            <button type="button" onclick="showDeleteModal('pers_admin', 'multiple')"
-                                id="deleteButtonPersAdmin"
-                                class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled>
-                                <i class="fas fa-trash-alt mr-2"></i>Supprimer
+                            <button onclick="deleteSelected('admin')" id="deleteButtonAdmin" class="btn btn-danger" disabled>
+                                <i class="fas fa-trash"></i>
+                                <span>Supprimer</span>
                             </button>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Titre de la liste -->
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h4 class="text-lg font-semibold text-gray-700 flex items-center">
-                            <i class="fas fa-list-ul mr-2 text-green-500"></i>
+                <!-- Table Personnel -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4 class="text-xl font-bold text-primary flex items-center">
+                            <i class="fas fa-list-ul mr-3"></i>
                             Liste du personnel administratif
                         </h4>
                     </div>
-
-                    <!-- Table de listing du personnel administratif -->
-                    <form class="bg-white shadow-md rounded-lg overflow-hidden mb-6" method="POST"
-                        action="?page=gestion_rh&tab=pers_admin">
+                    
+                    <form method="POST" action="?page=gestion_rh&tab=pers_admin">
                         <input type="hidden" name="submit_delete_multiple" id="submitDeletePersHidden" value="0">
+                        
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-4 py-3 text-center">
-                                            <input type="checkbox" id="selectAllCheckbox"
-                                                class="form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer">
+                            <table class="min-w-full" id="admin-table">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="px-6 py-4 text-center">
+                                            <input type="checkbox" id="selectAllAdmin" class="checkbox-custom">
                                         </th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Nom</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Prénom</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Email</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Téléphone</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Poste</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Date d'embauche</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Actions</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">👤 Nom</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">👤 Prénom</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">✉️ Email</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">📞 Téléphone</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">💼 Poste</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">📅 Date d'embauche</th>
+                                        <th class="px-6 py-4 text-center text-sm font-bold text-gray-600 uppercase tracking-wider">🔧 Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
+                                <tbody>
                                     <?php if (empty($personnel_admin)): ?>
-                                    <tr>
-                                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">
-                                            Aucun personnel administratif trouvé
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <td colspan="8" class="px-6 py-12 text-center">
+                                                <div class="flex flex-col items-center">
+                                                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                        <i class="fas fa-users-cog text-3xl text-gray-400"></i>
+                                                    </div>
+                                                    <p class="text-lg font-semibold text-gray-500 mb-2">Aucun personnel administratif</p>
+                                                    <p class="text-sm text-gray-400">Ajoutez votre premier membre du personnel</p>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     <?php else: ?>
-                                    <?php foreach ($personnel_admin as $admin): ?>
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-4 text-center">
-                                            <input type="checkbox" name="selected_ids[]"
-                                                value="<?= htmlspecialchars($admin->id_pers_admin) ?>"
-                                                class="form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer">
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            <?= htmlspecialchars($admin->nom_pers_admin) ?>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <?= htmlspecialchars($admin->prenom_pers_admin) ?>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <?= htmlspecialchars($admin->email_pers_admin) ?>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <?= htmlspecialchars($admin->tel_pers_admin) ?>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <?= htmlspecialchars($admin->poste) ?>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <?= htmlspecialchars($admin->date_embauche) ?>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div class="flex space-x-2">
-                                                <a href="#"
-                                                    onclick="showModifyModal('pers_admin', <?= $admin->id_pers_admin ?>); return false;"
-                                                    class="text-indigo-600 hover:text-indigo-900">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
+                                        <?php foreach ($personnel_admin as $admin): ?>
+                                            <tr class="table-row">
+                                                <td class="px-6 py-4 text-center">
+                                                    <input type="checkbox" name="selected_ids[]"
+                                                        value="<?= htmlspecialchars($admin->id_pers_admin) ?>"
+                                                        class="checkbox-custom">
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <div class="flex items-center">
+                                                        <div class="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                                                            <?= strtoupper(substr($admin->nom_pers_admin, 0, 1) . substr($admin->prenom_pers_admin, 0, 1)) ?>
+                                                        </div>
+                                                        <span class="font-semibold text-gray-900"><?= htmlspecialchars($admin->nom_pers_admin) ?></span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 font-medium text-gray-900"><?= htmlspecialchars($admin->prenom_pers_admin) ?></td>
+                                                <td class="px-6 py-4 text-gray-600"><?= htmlspecialchars($admin->email_pers_admin) ?></td>
+                                                <td class="px-6 py-4 text-gray-600"><?= htmlspecialchars($admin->tel_pers_admin) ?></td>
+                                                <td class="px-6 py-4">
+                                                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+                                                        <?= htmlspecialchars($admin->poste) ?>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 text-gray-600"><?= htmlspecialchars($admin->date_embauche) ?></td>
+                                                <td class="px-6 py-4 text-center">
+                                                    <div class="action-buttons">
+                                                        <button type="button" onclick="showEditModal('pers_admin', <?= $admin->id_pers_admin ?>)"
+                                                            class="action-btn edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button type="button" onclick="showDeleteModal('pers_admin', <?= $admin->id_pers_admin ?>)"
+                                                            class="action-btn delete">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
                     </form>
-
-                    <!-- Formulaire pour ajouter/modifier un personnel administratif -->
-                    <?php if ($action === 'add' || $action === 'edit'): ?>
-                    <div class="fixed inset-0 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50"
-                        id="modal-admin">
-                        <div class="relative mx-auto p-6 w-full max-w-2xl bg-white rounded-lg shadow-xl">
-                            <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-                                <h3 class="text-xl font-semibold text-green-600">
-                                    <?= ($action === 'edit' && isset($pers_admin_a_modifier)) ? 'Modifier un membre du personnel' : 'Ajouter un membre du personnel' ?>
-                                </h3>
-                                <a href="?page=gestion_rh&tab=pers_admin"
-                                    class="text-gray-400 hover:text-gray-500 transition-colors duration-200">
-                                    <i class="fas fa-times text-xl"></i>
-                                </a>
-                            </div>
-
-                            <form action="?page=gestion_rh&tab=pers_admin" method="POST" class="space-y-6">
-                                <?php if ($action === 'edit' && isset($pers_admin_a_modifier)): ?>
-                                <input type="hidden" name="id_pers_admin"
-                                    value="<?= htmlspecialchars($pers_admin_a_modifier->id_pers_admin) ?>">
-                                <?php endif; ?>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="nom"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Nom</label>
-                                        <input type="text" name="nom" id="nom" style="outline: none;"
-                                            value="<?= ($action === 'edit' && isset($pers_admin_a_modifier)) ? htmlspecialchars($pers_admin_a_modifier->nom_pers_admin) : '' ?>"
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                                            required>
-                                    </div>
-
-                                    <div>
-                                        <label for="prenom"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
-                                        <input type="text" name="prenom" id="prenom" style="outline: none;"
-                                            value="<?= ($action === 'edit' && isset($pers_admin_a_modifier)) ? htmlspecialchars($pers_admin_a_modifier->prenom_pers_admin) : '' ?>"
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                                            required>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="email"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                                        <input type="email" name="email" id="email" style="outline: none;"
-                                            value="<?= ($action === 'edit' && isset($pers_admin_a_modifier)) ? htmlspecialchars($pers_admin_a_modifier->email_pers_admin) : '' ?>"
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                                            required>
-                                    </div>
-                                    <div>
-                                        <label for="telephone"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
-                                        <input type="tel" name="telephone" id="telephone" style="outline: none;"
-                                            value="<?= ($action === 'edit' && isset($pers_admin_a_modifier)) ? htmlspecialchars($pers_admin_a_modifier->tel_pers_admin) : '' ?>"
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                                            required>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="poste"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Poste</label>
-                                        <input type="text" name="poste" id="poste" style="outline: none;"
-                                            value="<?= ($action === 'edit' && isset($pers_admin_a_modifier)) ? htmlspecialchars($pers_admin_a_modifier->poste) : '' ?>"
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                                            required>
-                                    </div>
-                                    <div>
-                                        <label for="date_embauche"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Date
-                                            d'embauche</label>
-                                        <input type="date" name="date_embauche" id="date_embauche"
-                                            style="outline: none;"
-                                            value="<?= ($action === 'edit' && isset($pers_admin_a_modifier)) ? htmlspecialchars($pers_admin_a_modifier->date_embauche) : '' ?>"
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                                            required>
-                                    </div>
-                                </div>
-
-
-                                <div class="flex justify-between space-x-4 pt-6 border-t border-gray-200">
-                                    <a href="?page=gestion_rh&tab=pers_admin"
-                                        class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors duration-200">
-                                        Annuler
-                                    </a>
-                                    <button type="submit"
-                                        name="<?= ($action === 'edit') ? 'btn_modifier_pers_admin' : 'btn_add_pers_admin' ?>"
-                                        class="px-6 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors duration-200">
-                                        <?= ($action === 'edit' && isset($pers_admin_a_modifier)) ? 'Modifier' : 'Enregistrer' ?>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <?php endif; ?>
                 </div>
-                <?php endif; ?>
+            </div>
 
-                <!-- Onglet Enseignants -->
-                <?php if ($activeTab === 'enseignant'): ?>
-                    <!-- STAT CARDS -->
-                    <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-8 -mt-25 mb-12 px-2">
-                        <div class="bg-gradient-to-br from-blue-100 to-blue-300 rounded-2xl shadow-xl p-8 flex flex-col items-center hover:scale-105 transition-transform">
-                            <i class="fas fa-file-alt text-4xl text-blue-600 mb-2"></i>
-                            <div class="text-3xl font-bold text-blue-800"><?php echo 0; ?></div>
-                            <div class="text-blue-700 mt-1">Total Enseignants</div>
+            <!-- Onglet Enseignants -->
+            <div id="tab_enseignant" class="<?= $activeTab === 'enseignant' ? '' : 'hidden' ?>">
+                <!-- Header section -->
+                <div class="card p-8 mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                        <div>
+                            <h2 class="text-3xl font-bold text-secondary mb-2">Enseignants</h2>
+                            <p class="text-gray-600">Gérez efficacement votre corps enseignant</p>
                         </div>
+                        <button onclick="showAddModal('enseignant')" class="btn btn-secondary">
+                            <i class="fas fa-plus"></i>
+                            <span>Nouvel Enseignant</span>
+                        </button>
                     </div>
-                    <?php endif; ?>
+                </div>
 
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-xl font-semibold text-gray-700">Gestion des enseignants</h3>
-                        <a href="?page=gestion_rh&tab=enseignant&action=add" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-sm
-                                  transition duration-150 ease-in-out flex items-center">
-                            <i class="fas fa-plus mr-2"></i> Ajouter un enseignant
-                        </a>
-                    </div>
-
-                    <!-- Action Bar for Table -->
-                    <div
-                        class="px-6 py-4 flex flex-col sm:flex-row justify-between items-center border-b border-gray-200">
-                        <div class="relative w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0">
-                            <input type="text" id="searchInputEnseignant" placeholder="Rechercher un enseignant..."
-                                class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <i class="fas fa-search text-gray-400"></i>
-                            </span>
+                <!-- Barre d'actions -->
+                <div class="card p-6 mb-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                        <div class="search-container flex-1 max-w-md">
+                            <input type="text" id="searchInputTeacher" placeholder="Rechercher un enseignant..."
+                                class="form-input search-input">
+                            <i class="fas fa-search search-icon"></i>
                         </div>
-                        <div class="flex flex-wrap gap-2 justify-center sm:justify-end">
-                            <button type="button" onclick="printTable('enseignant')"
-                                class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                                <i class="fas fa-print mr-2"></i>Imprimer
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="printTable('teacher-table')" class="btn btn-primary">
+                                <i class="fas fa-print"></i>
+                                <span>Imprimer</span>
                             </button>
-                            <button type="button" onclick="exportToExcel('enseignant')"
-                                class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50">
-                                <i class="fas fa-file-export mr-2"></i>Exporter
+                            <button onclick="exportToExcel('teacher-table')" class="btn btn-warning">
+                                <i class="fas fa-download"></i>
+                                <span>Exporter</span>
                             </button>
-                            <button type="button" onclick="showDeleteModal('enseignant')" id="deleteButtonEnseignant"
-                                class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg shadow transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled>
-                                <i class="fas fa-trash-alt mr-2"></i>Supprimer
+                            <button onclick="deleteSelected('teacher')" id="deleteButtonTeacher" class="btn btn-danger" disabled>
+                                <i class="fas fa-trash"></i>
+                                <span>Supprimer</span>
                             </button>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Titre de la liste -->
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h4 class="text-lg font-semibold text-gray-700 flex items-center">
-                            <i class="fas fa-chalkboard-teacher mr-2 text-green-500"></i>
+                <!-- Table Enseignants -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4 class="text-xl font-bold text-secondary flex items-center">
+                            <i class="fas fa-chalkboard-teacher mr-3"></i>
                             Liste des enseignants
                         </h4>
                     </div>
-
-                    <!-- Table de listing des enseignants -->
-                    <form class="bg-white shadow-md rounded-lg overflow-hidden mb-6" method="post"
-                        action="?page=gestion_rh&tab=enseignant">
+                    
+                    <form method="post" action="?page=gestion_rh&tab=enseignant">
                         <input type="hidden" name="submit_delete_multiple" id="submitDeleteHidden" value="0">
+                        
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-4 py-3 text-center">
-                                            <input type="checkbox" id="selectAllCheckboxEnseignant"
-                                                class="form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer">
+                            <table class="min-w-full" id="teacher-table">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="px-6 py-4 text-center">
+                                            <input type="checkbox" id="selectAllTeacher" class="checkbox-custom">
                                         </th>
-
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Nom & Prénom</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Email</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Spécialité</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Fonction</th>
-
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Grade</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Date grade</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Actions</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">👤 Nom Complet</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">✉️ Email</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">🎓 Spécialité</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">💼 Fonction</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">🏆 Grade</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">📅 Date Grade</th>
+                                        <th class="px-6 py-4 text-center text-sm font-bold text-gray-600 uppercase tracking-wider">🔧 Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
+                                <tbody>
                                     <?php if (empty($enseignants)): ?>
-                                    <tr>
-                                        <td colspan="11" class="px-6 py-4 text-center text-gray-500">
-                                            Aucun enseignant trouvé
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <td colspan="8" class="px-6 py-12 text-center">
+                                                <div class="flex flex-col items-center">
+                                                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                        <i class="fas fa-chalkboard-teacher text-3xl text-gray-400"></i>
+                                                    </div>
+                                                    <p class="text-lg font-semibold text-gray-500 mb-2">Aucun enseignant</p>
+                                                    <p class="text-sm text-gray-400">Ajoutez votre premier enseignant</p>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     <?php else: ?>
-                                    <?php foreach ($enseignants as $enseignant): ?>
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-4 text-center">
-                                            <input type="checkbox" name="selected_ids[]"
-                                                value="<?= htmlspecialchars($enseignant->id_enseignant) ?>"
-                                                class="user-checkbox form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer">
-                                        </td>
-
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            <?= htmlspecialchars($enseignant->nom_enseignant) ?>
-                                            <?= htmlspecialchars($enseignant->prenom_enseignant) ?>
-                                        </td>
-
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <?= htmlspecialchars($enseignant->mail_enseignant) ?>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <?= htmlspecialchars($enseignant->lib_specialite) ?>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <?= htmlspecialchars($enseignant->lib_fonction) ?>
-                                        </td>
-
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <?= htmlspecialchars($enseignant->lib_grade) ?>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <?= htmlspecialchars($enseignant->date_grade) ?>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div class="flex space-x-2">
-                                                <a href="#"
-                                                    onclick="showModifyModal('enseignant', <?= $enseignant->id_enseignant ?>); return false;"
-                                                    class="text-indigo-600 hover:text-indigo-900">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
+                                        <?php foreach ($enseignants as $enseignant): ?>
+                                            <tr class="table-row">
+                                                <td class="px-6 py-4 text-center">
+                                                    <input type="checkbox" name="selected_ids[]"
+                                                        value="<?= htmlspecialchars($enseignant->id_enseignant) ?>"
+                                                        class="checkbox-custom">
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <div class="flex items-center">
+                                                        <div class="w-10 h-10 bg-secondary/10 text-secondary rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                                                            <?= strtoupper(substr($enseignant->nom_enseignant, 0, 1) . substr($enseignant->prenom_enseignant, 0, 1)) ?>
+                                                        </div>
+                                                        <span class="font-semibold text-gray-900">
+                                                            <?= htmlspecialchars($enseignant->nom_enseignant . ' ' . $enseignant->prenom_enseignant) ?>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 text-gray-600"><?= htmlspecialchars($enseignant->mail_enseignant) ?></td>
+                                                <td class="px-6 py-4">
+                                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                                                        <?= htmlspecialchars($enseignant->lib_specialite) ?>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold">
+                                                        <?= htmlspecialchars($enseignant->lib_fonction) ?>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
+                                                        <?= htmlspecialchars($enseignant->lib_grade) ?>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 text-gray-600"><?= htmlspecialchars($enseignant->date_grade) ?></td>
+                                                <td class="px-6 py-4 text-center">
+                                                    <div class="action-buttons">
+                                                        <button type="button" onclick="showEditModal('enseignant', <?= $enseignant->id_enseignant ?>)"
+                                                            class="action-btn edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button type="button" onclick="showDeleteModal('enseignant', <?= $enseignant->id_enseignant ?>)"
+                                                            class="action-btn delete">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
                     </form>
-
-                    <!-- Formulaire pour ajouter/modifier un enseignant -->
-                    <?php if ($action === 'add' || $action === 'edit'): ?>
-                    <div class="fixed inset-0  bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50"
-                        id="modal-enseignant">
-                        <div class="relative mx-auto p-6 w-full max-w-2xl bg-white rounded-lg shadow-xl">
-                            <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-                                <h3 class="text-xl font-semibold text-green-600">
-                                    <?= ($action === 'edit' && isset($enseignant_a_modifier)) ? 'Modifier un enseignant' : 'Ajouter un enseignant' ?>
-                                </h3>
-                                <a href="?page=gestion_rh&tab=enseignant"
-                                    class="text-gray-400 hover:text-gray-500 transition-colors duration-200">
-                                    <i class="fas fa-times text-xl"></i>
-                                </a>
-                            </div>
-
-                <form action="?page=gestion_rh&tab=enseignant" method="POST" class="space-y-6">
-                    <?php if ($action === 'edit' && isset($enseignant_a_modifier)): ?>
-                        <input type="hidden" name="id_enseignant" value="<?= htmlspecialchars($enseignant_a_modifier->id_enseignant) ?>">
-                    <?php endif; ?>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="nom_enseignant"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Nom</label>
-                                        <input type="text" name="nom" id="nom_enseignant" style="outline: none;"
-                                            value="<?= ($action === 'edit' && isset($enseignant_a_modifier)) ? htmlspecialchars($enseignant_a_modifier->nom_enseignant) : '' ?>"
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                                            required>
-                                    </div>
-
-                                    <div>
-                                        <label for="prenom_enseignant"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
-                                        <input type="text" name="prenom" id="prenom_enseignant" style="outline: none;"
-                                            value="<?= ($action === 'edit' && isset($enseignant_a_modifier)) ? htmlspecialchars($enseignant_a_modifier->prenom_enseignant) : '' ?>"
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                                            required>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="email_enseignant"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                                        <input type="email" name="email" id="email_enseignant" style="outline: none;"
-                                            value="<?= ($action === 'edit' && isset($enseignant_a_modifier)) ? htmlspecialchars($enseignant_a_modifier->mail_enseignant) : '' ?>"
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                                            required>
-                                    </div>
-
-                                    <div>
-                                        <label for="specialite"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Spécialité</label>
-                                        <select name="id_specialite" id="specialite" style="outline: none;" required
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200">
-                                            <?php foreach ($listeSpecialites as $specialite): ?>
-                                            <option value="<?= htmlspecialchars($specialite->id_specialite) ?>"
-                                                <?= ($action === 'edit' && isset($enseignant_a_modifier) && $enseignant_a_modifier->id_specialite == $specialite->id_specialite) ? 'selected' : '' ?>>
-                                                <?= htmlspecialchars($specialite->lib_specialite) ?>
-                                            </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="fonction"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Fonction</label>
-                                        <select name="id_fonction" id="fonction" style="outline: none;" required
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200">
-                                            <?php foreach ($listeFonctions as $fonction): ?>
-                                            <option value="<?= htmlspecialchars($fonction->id_fonction) ?>"
-                                                <?= ($action === 'edit' && isset($enseignant_a_modifier) && $enseignant_a_modifier->id_fonction == $fonction->id_fonction) ? 'selected' : '' ?>>
-                                                <?= htmlspecialchars($fonction->lib_fonction) ?>
-                                            </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="date_fonction"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Date
-                                            d'occupation de la
-                                            fonction</label>
-                                        <input type="date" name="date_fonction" id="date_fonction"
-                                            style="outline: none;"
-                                            value="<?= ($action === 'edit' && isset($enseignant_a_modifier)) ? htmlspecialchars($enseignant_a_modifier->date_occupation) : '' ?>"
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                                            required>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="grade"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Grade</label>
-                                        <select name="id_grade" id="grade" style="outline: none;" required
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200">
-                                            <?php foreach ($listeGrades as $grade): ?>
-                                            <option value="<?= htmlspecialchars($grade->id_grade) ?>"
-                                                <?= ($action === 'edit' && isset($enseignant_a_modifier) && $enseignant_a_modifier->id_grade == $grade->id_grade) ? 'selected' : '' ?>>
-                                                <?= htmlspecialchars($grade->lib_grade) ?>
-                                            </option>
-                                            <?php endforeach; ?>
-                                        </select>
-
-                                    </div>
-
-                                    <div>
-                                        <label for="date_grade"
-                                            class="block text-sm font-medium text-gray-700 mb-2">Date
-                                            d'obtention du
-                                            grade</label>
-                                        <input type="date" name="date_grade" id="date_grade" style="outline: none;"
-                                            value="<?= ($action === 'edit' && isset($enseignant_a_modifier)) ? htmlspecialchars($enseignant_a_modifier->date_grade) : '' ?>"
-                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                                            required>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div class="space-y-2">
-                                        <label for="type_enseignant" class="block text-sm font-medium text-gray-700">
-                                            Type d'enseignant
-                                        </label>
-                                        <select name="type_enseignant" id="type_enseignant" required
-                                            class="focus:outline-none w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white transition-all duration-200">
-                                            <option value="Simple"
-                                                <?php echo ($enseignant_a_modifier && $enseignant_a_modifier->type_enseignant) ? 'selected' : ''; ?>>
-                                                Simple</option>
-                                            <option value="Administratif"
-                                                <?php echo ($enseignant_a_modifier && !$enseignant_a_modifier->type_enseignant) ? 'selected' : ''; ?>>
-                                                Administratif</option>
-                                        </select>
-                                    </div>
-
-                                </div>
-
-                                <div class="flex justify-between space-x-4 pt-6 border-t border-gray-200">
-                                    <a href="?page=gestion_rh&tab=enseignant"
-                                        class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors duration-200">
-                                        Annuler
-                                    </a>
-                                    <button type="submit"
-                                        name="<?= ($action === 'edit') ? 'btn_modifier_enseignant' : 'btn_add_enseignant' ?>"
-                                        class="px-6 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors duration-200">
-                                        <?= ($action === 'edit' && isset($enseignant_a_modifier)) ? 'Modifier' : 'Ajouter' ?>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <?php endif; ?>
                 </div>
-                
             </div>
-        </main>
+        </div>
     </div>
 
-    <!-- Modale de confirmation de suppression -->
-    <div id="deleteModal"
-        class="fixed inset-0 flex items-center justify-center z-50 hidden animate__animated animate__fadeIn">
-        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 animate__animated animate__zoomIn">
-            <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+    <!-- Modal Personnel Administratif -->
+    <div class="modal-overlay" id="modal-admin">
+        <div class="modal-container">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-primary">Nouveau Personnel Administratif</h3>
+                    <p class="text-gray-600 mt-1">Complétez les informations ci-dessous</p>
                 </div>
-                <h3 class="text-3xl font-bold text-gray-900 mb-4">Confirmation de Suppression</h3>
-                <p class="text-lg text-gray-600 mb-8">
-                    Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ? Cette action est irréversible.
-                </p>
-                <div class="flex justify-center gap-4">
-                    <button type="button" id="confirmDelete"
-                        class="px-8 py-3 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 shadow-lg">
-                        <i class="fas fa-check mr-3"></i> Confirmer
+                <button onclick="closeModal('modal-admin')" class="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-2xl flex items-center justify-center text-gray-400 hover:text-gray-600 transition-all duration-300">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="modal-admin-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nom</label>
+                        <input type="text" name="nom" id="modal-admin-nom" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Prénom</label>
+                        <input type="text" name="prenom" id="modal-admin-prenom" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                        <input type="email" name="email" id="modal-admin-email" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Téléphone</label>
+                        <input type="tel" name="telephone" id="modal-admin-telephone" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Poste</label>
+                        <input type="text" name="poste" id="modal-admin-poste" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Date d'embauche</label>
+                        <input type="date" name="date_embauche" id="modal-admin-date" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-8">
+                    <button type="button" onclick="closeModal('modal-admin')" class="btn btn-gray flex-1">
+                        Annuler
                     </button>
-                    <button type="button" id="cancelDeleteButton"
-                        class="px-8 py-3 bg-gray-200 text-gray-800 font-bold rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 shadow-md">
-                        <i class="fas fa-times mr-3"></i> Annuler
+                    <button type="submit" class="btn btn-primary flex-1">
+                        <i class="fas fa-save"></i>
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Enseignant -->
+    <div class="modal-overlay" id="modal-enseignant">
+        <div class="modal-container">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-secondary">Nouvel Enseignant</h3>
+                    <p class="text-gray-600 mt-1">Complétez les informations ci-dessous</p>
+                </div>
+                <button onclick="closeModal('modal-enseignant')" class="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-2xl flex items-center justify-center text-gray-400 hover:text-gray-600 transition-all duration-300">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="modal-enseignant-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nom</label>
+                        <input type="text" name="nom" id="modal-enseignant-nom" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Prénom</label>
+                        <input type="text" name="prenom" id="modal-enseignant-prenom" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                        <input type="email" name="email" id="modal-enseignant-email" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Spécialité</label>
+                        <select name="specialite" id="modal-enseignant-specialite" class="form-input" required>
+                            <option value="">Sélectionner une spécialité</option>
+                            <?php foreach ($listeSpecialites as $specialite): ?>
+                                <option value="<?= htmlspecialchars($specialite->id_specialite) ?>">
+                                    <?= htmlspecialchars($specialite->lib_specialite) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Grade</label>
+                        <select name="grade" id="modal-enseignant-grade" class="form-input" required>
+                            <option value="">Sélectionner un grade</option>
+                            <?php foreach ($listeGrades as $grade): ?>
+                                <option value="<?= htmlspecialchars($grade->id_grade) ?>">
+                                    <?= htmlspecialchars($grade->lib_grade) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Date Grade</label>
+                        <input type="date" name="date_grade" id="modal-enseignant-date-grade" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-8">
+                    <button type="button" onclick="closeModal('modal-enseignant')" class="btn btn-gray flex-1">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-secondary flex-1">
+                        <i class="fas fa-save"></i>
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal-container max-w-md">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Confirmer la suppression</h3>
+                <p class="text-gray-600 mb-8">Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ? Cette action est irréversible.</p>
+
+                <div class="flex gap-4">
+                    <button onclick="closeModal('delete-modal')" class="btn btn-gray flex-1">
+                        Annuler
+                    </button>
+                    <button onclick="confirmDelete()" class="btn btn-danger flex-1">
+                        <i class="fas fa-trash"></i>
+                        Supprimer
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <form id="delete-form" method="POST" style="display: none;">
-        <input type="hidden" name="selected_ids[]" id="delete_id">
-        <input type="hidden" name="delete_type" id="delete_type_input">
-    </form>
+    <script>
+        // Variables globales pour la gestion
+        let currentDeleteType = '';
+        const personnelAdminData = <?= json_encode($personnel_admin) ?>;
+        const enseignantsData = <?= json_encode($enseignants) ?>;
 
-</body>
-<script>
-    // Variables globales pour les formulaires et les boutons
-    // Note: Re-selecting forms for robustness as per previous fix, closest('form') for accuracy.
-    const formListePersAdmin = document.querySelector('#tab_pers_admin table').closest('form');
-    const formListeEnseignant = document.querySelector('#tab_enseignant table').closest('form');
-
-    // Variables pour le personnel administratif
-    const selectAllCheckboxPersAdmin = document.getElementById('selectAllCheckbox');
-    const deleteButtonPersAdmin = document.getElementById('deleteButtonPersAdmin');
-    const submitDeletePersHidden = document.getElementById('submitDeletePersHidden');
-
-    // Variables pour les enseignants
-    const selectAllCheckboxEnseignant = document.getElementById('selectAllCheckboxEnseignant');
-    const deleteButtonEnseignant = document.getElementById('deleteButtonEnseignant');
-    const submitDeleteHidden = document.getElementById('submitDeleteHidden');
-
-    // Variables pour les modales
-    const deleteModal = document.getElementById('deleteModal');
-    const confirmDelete = document.getElementById('confirmDelete');
-    const cancelDelete = document.getElementById('cancelDeleteButton'); // Corrected ID
-
-    // Track which type (pers_admin or enseignant) delete modal was opened for
-    let currentDeleteType = '';
-
-    // Initialisation des checkboxes et de l'état des boutons
-    function initializeCheckboxes(selectAllCheckboxElem, deleteButtonElem, formElem) {
-        if (selectAllCheckboxElem && deleteButtonElem && formElem) {
-            selectAllCheckboxElem.addEventListener('change', function() {
-                const checkboxes = formElem.querySelectorAll('input[name="selected_ids[]"]');
-                checkboxes.forEach(checkbox => checkbox.checked = this.checked);
-                updateDeleteButtonState(deleteButtonElem, formElem);
-            });
-
-            formElem.addEventListener('change', function(e) {
-                if (e.target.name === 'selected_ids[]') {
-                    updateDeleteButtonState(deleteButtonElem, formElem);
-                    const allCheckboxes = formElem.querySelectorAll('input[name="selected_ids[]"]');
-                    const checkedBoxes = formElem.querySelectorAll('input[name="selected_ids[]"]:checked');
-                    selectAllCheckboxElem.checked = checkedBoxes.length === allCheckboxes.length && allCheckboxes.length > 0;
-                }
-            });
-        }
-    }
-
-    // Mise à jour de l'état du bouton de suppression
-    function updateDeleteButtonState(deleteBtn, form) {
-        if (deleteBtn && form) {
-            const checkedBoxes = form.querySelectorAll('input[name="selected_ids[]"]:checked');
-            deleteBtn.disabled = checkedBoxes.length === 0;
-        }
-    }
-
-    // Initialisation des deux sections au chargement du DOM
-    document.addEventListener('DOMContentLoaded', () => {
-        // Initialisation pour Personnel Administratif
-        if (selectAllCheckboxPersAdmin && deleteButtonPersAdmin && formListePersAdmin) {
-            initializeCheckboxes(selectAllCheckboxPersAdmin, deleteButtonPersAdmin, formListePersAdmin);
-            updateDeleteButtonState(deleteButtonPersAdmin, formListePersAdmin);
-        }
-
-        // Initialisation pour Enseignants
-        if (selectAllCheckboxEnseignant && deleteButtonEnseignant && formListeEnseignant) {
-            initializeCheckboxes(selectAllCheckboxEnseignant, deleteButtonEnseignant, formListeEnseignant);
-            updateDeleteButtonState(deleteButtonEnseignant, formListeEnseignant);
-        }
-
-        // Display modal if action is 'add' or 'edit'
-        const urlParams = new URLSearchParams(window.location.search);
-        const action = urlParams.get('action');
-        const tab = urlParams.get('tab');
-
-        if (action === 'add' || action === 'edit') {
-            if (tab === 'pers_admin') {
-                const modalAdmin = document.getElementById('modal-admin');
-                if (modalAdmin) modalAdmin.style.display = 'flex';
-            } else if (tab === 'enseignant') {
-                const modalEnseignant = document.getElementById('modal-enseignant');
-                if (modalEnseignant) modalEnseignant.style.display = 'flex';
-            }
-        }
-    });
-
-    // Gestion de la modale de suppression
-    function showDeleteModal(type) {
-        currentDeleteType = type; // Set the type for deletion
-        const form = type === 'pers_admin' ? formListePersAdmin : formListeEnseignant;
-        const checkboxes = form.querySelectorAll('input[name="selected_ids[]"]:checked');
-
-        if (checkboxes.length === 0) {
-            alert('Veuillez sélectionner au moins un élément à supprimer');
-            return;
-        }
-
-        deleteModal.style.display = 'flex';
-    }
-
-// Gestion de la suppression
-if (confirmDelete) {
-    confirmDelete.addEventListener('click', function() {
-        const activeTab = document.querySelector('.tab-button.border-green-500').getAttribute('href').split(
-            'tab=')[1];
-        const form = activeTab === 'pers_admin' ? formListePersAdmin : formListeEnseignant;
-
-            if (form) {
-                // Ensure the correct hidden input for submission is used
-                const submitHiddenInput = currentDeleteType === 'pers_admin' ? submitDeletePersHidden : submitDeleteHidden;
-                if (submitHiddenInput) {
-                    submitHiddenInput.value = '1';
-                }
-
-                // Create a temporary form to submit only the checked items for the current type
-                const tempForm = document.createElement('form');
-                tempForm.method = 'POST';
-                tempForm.action = `?page=gestion_rh&tab=${currentDeleteType}`; // Ensure correct tab is targeted
-
-                const selectedCheckboxes = form.querySelectorAll('input[name="selected_ids[]"]:checked');
-                selectedCheckboxes.forEach(checkbox => {
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'selected_ids[]';
-                    hiddenInput.value = checkbox.value;
-                    tempForm.appendChild(hiddenInput);
+        // Gestion des checkboxes
+        function initializeCheckboxes() {
+            // Personnel Admin
+            const selectAllAdmin = document.getElementById('selectAllAdmin');
+            const deleteButtonAdmin = document.getElementById('deleteButtonAdmin');
+            
+            if (selectAllAdmin) {
+                selectAllAdmin.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('#tab_pers_admin input[name="selected_ids[]"]');
+                    checkboxes.forEach(cb => cb.checked = this.checked);
+                    updateDeleteButton('admin');
                 });
-
-                // Add a hidden input to signify this is a multiple deletion request
-                const deleteActionInput = document.createElement('input');
-                deleteActionInput.type = 'hidden';
-                deleteActionInput.name = 'submit_delete_multiple';
-                deleteActionInput.value = '1';
-                tempForm.appendChild(deleteActionInput);
-
-                document.body.appendChild(tempForm);
-                tempForm.submit();
             }
-            deleteModal.style.display = 'none';
-        });
-    }
 
-    // Gestion de l'annulation de suppression
-    if (cancelDelete) {
-        cancelDelete.addEventListener('click', function() {
-            deleteModal.style.display = 'none';
-        });
-    }
+            // Enseignants
+            const selectAllTeacher = document.getElementById('selectAllTeacher');
+            const deleteButtonTeacher = document.getElementById('deleteButtonTeacher');
+            
+            if (selectAllTeacher) {
+                selectAllTeacher.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('#tab_enseignant input[name="selected_ids[]"]');
+                    checkboxes.forEach(cb => cb.checked = this.checked);
+                    updateDeleteButton('teacher');
+                });
+            }
 
-    // Gestion de la modale de modification (direct redirection as per previous logic)
-    function showModifyModal(type, id) {
-        window.location.href = `?page=gestion_rh&tab=${type}&action=edit&id_${type}=${id}`;
-    }
-
-    // Fermer les modales si on clique en dehors
-    window.addEventListener('click', function(e) {
-        if (e.target === deleteModal) {
-            deleteModal.style.display = 'none';
+            // Event listeners pour les checkboxes individuelles
+            document.addEventListener('change', function(e) {
+                if (e.target.name === 'selected_ids[]') {
+                    const isAdmin = e.target.closest('#tab_pers_admin');
+                    updateDeleteButton(isAdmin ? 'admin' : 'teacher');
+                }
+            });
         }
-        const modalAdmin = document.getElementById('modal-admin');
-        const modalEnseignant = document.getElementById('modal-enseignant');
 
-        if (modalAdmin && e.target === modalAdmin) {
-            modalAdmin.style.display = 'none';
-            window.location.href = '?page=gestion_rh&tab=pers_admin';
-        }
-        if (modalEnseignant && e.target === modalEnseignant) {
-            modalEnseignant.style.display = 'none';
-            window.location.href = '?page=gestion_rh&tab=enseignant';
-        }
-    });
-
-    // Fonction pour exporter vers Excel
-    function exportToExcel(type) {
-        const table = document.querySelector(`#tab_${type} table`);
-        const rows = Array.from(table.querySelectorAll('tr'));
-
-        let csvContent = "data:text/csv;charset=utf-8,";
-
-        const headers = Array.from(rows[0].querySelectorAll('th'))
-            .filter(th => th.textContent.trim() !== '' && th.textContent.trim().toLowerCase() !== 'actions') // Filter out checkbox and actions
-            .map(th => th.textContent.trim());
-        csvContent += headers.join(',') + '\n';
-
-        rows.slice(1).forEach(row => {
-            const cells = Array.from(row.querySelectorAll('td'))
-                .filter((td, index) => {
-                    // Filter out the first column (checkbox) and the last (actions)
-                    const headerCells = Array.from(row.closest('table').querySelectorAll('thead th'));
-                    return index > 0 && index < headerCells.length - 1;
-                })
-                .map(td => `"${td.textContent.trim().replace(/"/g, '""')}"`); // Handle commas and quotes
-            csvContent += cells.join(',') + '\n';
-        });
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', `${type === 'pers_admin' ? 'personnel_administratif' : 'enseignants'}_${new Date().toISOString().slice(0,10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-
-    // Fonction pour imprimer
-    function printTable(type) {
-        const printWindow = window.open('', '_blank');
-        const table = document.querySelector(`#tab_${type} table`);
-
-        const content = `
-            <html>
-            <head>
-                <title>Impression - ${type === 'pers_admin' ? 'Personnel Administratif' : 'Enseignants'}</title>
-                <style>
-                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; color: #333; }
-                    table { width: 100%; border-collapse: collapse; margin: 25px 0; font-size: 14px; }
-                    th, td { border: 1px solid #e0e0e0; padding: 12px 15px; text-align: left; }
-                    th { background-color: #f5f5f5; font-weight: bold; }
-                    tr:nth-child(even) { background-color: #f9f9f9; }
-                    h1 { text-align: center; color: #157A6E; margin-bottom: 40px; font-size: 28px; }
-                    .header-logo { display: block; margin: 0 auto 20px auto; max-width: 150px; }
-                    @media print {
-                        body { margin: 0; padding: 20px; }
-                        table { page-break-inside: auto; }
-                        tr { page-break-inside: avoid; page-break-after: auto; }
-                    }
-                </style>
-            </head>
-            <body>
-                <img src="./images/logo.png" alt="Logo Université" class="header-logo">
-                <h1>${type === 'pers_admin' ? 'Liste du Personnel Administratif' : 'Liste des Enseignants'}</h1>
-                <table>
-                    <thead>
-                        <tr>
-                            ${Array.from(table.querySelectorAll('thead th'))
-                                .filter(th => th.textContent.trim() !== '' && th.textContent.trim().toLowerCase() !== 'actions')
-                                .map(th => `<th>${th.textContent}</th>`).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${Array.from(table.querySelectorAll('tbody tr')).map(row => `
-                            <tr>
-                                ${Array.from(row.querySelectorAll('td'))
-                                    .filter((td, index) => {
-                                        const headerCells = Array.from(table.querySelectorAll('thead th'));
-                                        return index > 0 && index < headerCells.length -1;
-                                    })
-                                    .map(td => `<td>${td.innerHTML}</td>`).join('')
-    } <
-    /tr>
-    `).join('')}
-                    </tbody>
-                </table>
-            </body>
-            </html>
-        `;
-
-    printWindow.document.write(content);
-    printWindow.document.close();
-    printWindow.focus();
-
-    printWindow.onload = function() {
-        printWindow.print();
-        printWindow.close();
-    };
-    }
-
-    // Gestion des messages temporisés
-    document.addEventListener('DOMContentLoaded', function() {
-        const successMessage = document.getElementById('success-message');
-        const errorMessage = document.getElementById('error-message');
-
-        function hideMessage(element) {
-            if (element) {
-                element.style.transition = 'opacity 0.5s ease-out';
-                element.style.opacity = '0';
-                setTimeout(() => {
-                    element.style.display = 'none';
-                }, 500);
+        function updateDeleteButton(type) {
+            const selector = type === 'admin' ? '#tab_pers_admin' : '#tab_enseignant';
+            const deleteBtn = document.getElementById(type === 'admin' ? 'deleteButtonAdmin' : 'deleteButtonTeacher');
+            const checkedBoxes = document.querySelectorAll(`${selector} input[name="selected_ids[]"]:checked`);
+            
+            if (deleteBtn) {
+                deleteBtn.disabled = checkedBoxes.length === 0;
             }
         }
 
-        if (successMessage) {
-            setTimeout(() => hideMessage(successMessage), 4000); // 4 seconds for success
+        // Gestion des modales
+        function showAddModal(type) {
+            const modal = document.getElementById('modal-' + type);
+            if (modal) {
+                modal.style.display = 'flex';
+                // Reset form
+                const form = modal.querySelector('form');
+                if (form) form.reset();
+            }
         }
-        if (errorMessage) {
-            setTimeout(() => hideMessage(errorMessage), 5000); // 5 seconds for error
-        }
-    });
 
-    // Fonction de recherche
-    function searchTable(inputId, type) {
-        const input = document.getElementById(inputId);
-        const table = document.querySelector(`#tab_${type} table`);
-        const filter = input.value.toUpperCase();
-        const rows = table.querySelectorAll('tbody tr');
-
-        rows.forEach(row => {
-            const cells = Array.from(row.querySelectorAll('td')).slice(1, -1); // Exclude checkbox and actions
-            let found = false;
-
-            for (let i = 0; i < cells.length; i++) {
-                const text = cells[i].textContent || cells[i].innerText;
-                if (text.toUpperCase().includes(filter)) {
-                    found = true;
-                    break;
+        function showEditModal(type, id) {
+            const modal = document.getElementById('modal-' + type);
+            if (modal) {
+                modal.style.display = 'flex';
+                
+                // Pré-remplir le formulaire
+                const data = type === 'pers_admin' ? 
+                    personnelAdminData.find(item => item.id_pers_admin == id) :
+                    enseignantsData.find(item => item.id_enseignant == id);
+                
+                if (data && type === 'pers_admin') {
+                    document.getElementById('modal-admin-nom').value = data.nom_pers_admin || '';
+                    document.getElementById('modal-admin-prenom').value = data.prenom_pers_admin || '';
+                    document.getElementById('modal-admin-email').value = data.email_pers_admin || '';
+                    document.getElementById('modal-admin-telephone').value = data.tel_pers_admin || '';
+                    document.getElementById('modal-admin-poste').value = data.poste || '';
+                    document.getElementById('modal-admin-date').value = data.date_embauche || '';
+                } else if (data && type === 'enseignant') {
+                    document.getElementById('modal-enseignant-nom').value = data.nom_enseignant || '';
+                    document.getElementById('modal-enseignant-prenom').value = data.prenom_enseignant || '';
+                    document.getElementById('modal-enseignant-email').value = data.mail_enseignant || '';
+                    // Autres champs enseignant...
                 }
             }
-            row.style.display = found ? "" : "none";
+        }
+
+        function showDeleteModal(type, id = null) {
+            currentDeleteType = type;
+            const modal = document.getElementById('delete-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                
+                // Si suppression individuelle, cocher l'élément
+                if (id) {
+                    const selector = type === 'pers_admin' ? '#tab_pers_admin' : '#tab_enseignant';
+                    const checkboxes = document.querySelectorAll(`${selector} input[name="selected_ids[]"]`);
+                    checkboxes.forEach(cb => cb.checked = false);
+                    
+                    const targetCheckbox = document.querySelector(`${selector} input[value="${id}"]`);
+                    if (targetCheckbox) targetCheckbox.checked = true;
+                    
+                    updateDeleteButton(type === 'pers_admin' ? 'admin' : 'teacher');
+                }
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = 'none';
+        }
+
+        function confirmDelete() {
+            // Logique de suppression
+            console.log('Suppression confirmée pour:', currentDeleteType);
+            closeModal('delete-modal');
+        }
+
+        function deleteSelected(type) {
+            const activeType = type === 'admin' ? 'pers_admin' : 'enseignant';
+            showDeleteModal(activeType);
+        }
+
+        // Fonctions d'export et impression
+        function exportToExcel(tableId) {
+            console.log('Export Excel pour:', tableId);
+            // Logique d'export
+        }
+
+        function printTable(tableId) {
+            console.log('Impression pour:', tableId);
+            // Logique d'impression
+        }
+
+        // Recherche
+        function setupSearch() {
+            const searchAdmin = document.getElementById('searchInputAdmin');
+            const searchTeacher = document.getElementById('searchInputTeacher');
+            
+            if (searchAdmin) {
+                searchAdmin.addEventListener('keyup', function() {
+                    filterTable('admin-table', this.value);
+                });
+            }
+            
+            if (searchTeacher) {
+                searchTeacher.addEventListener('keyup', function() {
+                    filterTable('teacher-table', this.value);
+                });
+            }
+        }
+
+        function filterTable(tableId, searchTerm) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            
+            const rows = table.querySelectorAll('tbody tr');
+            const term = searchTerm.toLowerCase();
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        }
+
+        // Fermeture des modales en cliquant à l'extérieur
+        window.addEventListener('click', function(e) {
+            const modals = ['modal-admin', 'modal-enseignant', 'delete-modal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (modal && e.target === modal) {
+                    closeModal(modalId);
+                }
+            });
         });
 
-        // Update checkbox states after search
-        const selectAllCheckbox = document.getElementById(type === 'pers_admin' ? 'selectAllCheckbox' : 'selectAllCheckboxEnseignant');
-        const deleteButton = document.getElementById(type === 'pers_admin' ? 'deleteButtonPersAdmin' : 'deleteButtonEnseignant');
-        const form = type === 'pers_admin' ? formListePersAdmin : formListeEnseignant;
-
-        if (selectAllCheckbox && deleteButton && form) {
-            const visibleRows = Array.from(form.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
-            const visibleCheckboxes = visibleRows.map(row => row.querySelector('input[name="selected_ids[]"]')).filter(checkbox => checkbox !== null);
-            const checkedVisibleBoxes = visibleCheckboxes.filter(checkbox => checkbox.checked);
-
-            selectAllCheckbox.checked = (visibleCheckboxes.length > 0 && checkedVisibleBoxes.length === visibleCheckboxes.length);
-            deleteButton.disabled = checkedVisibleBoxes.length === 0;
+        // Notifications
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-6 right-6 z-50 p-4 rounded-lg shadow-lg max-w-sm transform transition-all duration-300 ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check' : 'times'}-circle mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
-    }
 
-    // Listeners for search inputs
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInputPersAdmin = document.getElementById('searchInput');
-        const searchInputEnseignant = document.getElementById('searchInputEnseignant');
-
-        if (searchInputPersAdmin) {
-            searchInputPersAdmin.addEventListener('keyup', function() {
-                searchTable('searchInput', 'pers_admin');
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCheckboxes();
+            setupSearch();
+            
+            // Animation des cartes
+            const cards = document.querySelectorAll('.stat-card, .card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
             });
-        }
-        if (searchInputEnseignant) {
-            searchInputEnseignant.addEventListener('keyup', function() {
-                searchTable('searchInputEnseignant', 'enseignant');
-            });
-        }
-    });
-</script>
+        });
+    </script>
+</body>
 
 </html>

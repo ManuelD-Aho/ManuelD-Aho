@@ -182,58 +182,88 @@ $utilisateurs = array_slice($allUtilisateurs, $offset, $limit);
 
 
 
-    <div class="header bg-white rounded-3xl p-8 lg:p-12 mb-8 shadow-xl relative overflow-hidden">
+    <!-- Header Section -->
+    <div class="header bg-white rounded-3xl p-8 lg:p-12 mb-8 shadow-xl relative overflow-hidden animate-fade-in-up">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-custom-primary via-custom-success-dark to-custom-success-light"></div>
         <div class="flex items-center gap-6 md:gap-8 flex-col md:flex-row text-center md:text-left">
-            <div class="header-icon bg-gradient-to-br from-primary to-primary-dark text-white w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-lg">
-                <i class="fas fa-clipboard-check"></i>
+            <div class="header-icon bg-gradient-to-br from-custom-primary to-custom-primary-dark text-white w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-lg hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-users"></i>
             </div>
             <div class="header-text">
-                <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">Gestion des utilisateurs</h1>
-                <p class="text-lg text-gray-600 font-normal">Superviser et administrer les comptes utilisateurs.</p>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">Gestion des Utilisateurs</h1>
+                <p class="text-lg text-gray-600 font-normal">Administration des comptes et des permissions</p>
             </div>
         </div>
     </div>
 
 
 
-    <!-- Stats Overview -->
-    <section class="container  mx-auto px-6 py-8 -mt-8 relative z-20">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="stat-card bg-white rounded-2xl p-6 shadow-md transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg relative overflow-hidden" style="animation-delay: 0.1s">
-                <div class="stat-content flex items-center gap-4">
-                    <div class="stat-icon bg-primary/10 text-primary w-12 h-12 rounded-xl flex items-center justify-center text-2xl">
-                        <i class="fas fa-users text-custom-primary text-2xl"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 class="text-4xl font-bold text-primary mb-1"><?php echo $totalUtilisateurs; ?></h3>
-                        <p class="text-sm font-medium text-gray-600">Total Utilisateurs </p>
-                    </div>
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card bg-white rounded-2xl p-6 shadow-lg transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden border border-gray-100 animate-fade-in-up" style="animation-delay: 0.1s">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-custom-primary to-custom-primary-dark"></div>
+            <div class="stat-content flex items-center gap-4">
+                <div class="stat-icon bg-custom-primary/10 text-custom-primary w-14 h-14 rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                    <i class="fas fa-users"></i>
                 </div>
-            </div>
-            <div class="stat-card bg-white rounded-2xl p-6 shadow-md transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg relative overflow-hidden" style="animation-delay: 0.2s">
-                <div class="stat-content flex items-center gap-4">
-                    <div class="stat-icon bg-secondary/10 text-secondary w-12 h-12 rounded-xl flex items-center justify-center text-2xl">
-                        <i class="fas fa-user-check text-custom-success-light text-2xl"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 class="text-4xl font-bold text-secondary mb-1"><?php echo $utilisateursActifs; ?></h3>
-                        <p class="text-sm font-medium text-gray-600">Utilisateurs Actifs</p>
-                    </div>
-                </div>
-            </div>
-            <div class="stat-card bg-white rounded-2xl p-6 shadow-md transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg relative overflow-hidden" style="animation-delay: 0.3s">
-                <div class="stat-content flex items-center gap-4">
-                    <div class="stat-icon bg-warning/10 text-warning w-12 h-12 rounded-xl flex items-center justify-center text-2xl">
-                        <i class="fas fa-user-times text-red-error text-2xl"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 class="text-4xl font-bold text-warning mb-1"><?php echo $utilisateursInactifs; ?></h3>
-                        <p class="text-sm font-medium text-gray-600">Utilisateurs Inactifs</p>
-                    </div>
+                <div class="stat-info">
+                    <h3 class="text-3xl font-bold text-custom-primary-dark mb-1"><?php echo $totalUtilisateurs; ?></h3>
+                    <p class="text-sm font-semibold text-gray-600">Total Utilisateurs</p>
+                    <p class="text-xs text-blue-600 font-medium mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>Global
+                    </p>
                 </div>
             </div>
         </div>
-    </section>
+        
+        <div class="stat-card bg-white rounded-2xl p-6 shadow-lg transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden border border-gray-100 animate-fade-in-up" style="animation-delay: 0.2s">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-custom-success-dark to-custom-success-light"></div>
+            <div class="stat-content flex items-center gap-4">
+                <div class="stat-icon bg-custom-success-dark/10 text-custom-success-dark w-14 h-14 rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="text-3xl font-bold text-custom-success-dark mb-1"><?php echo $utilisateursActifs; ?></h3>
+                    <p class="text-sm font-semibold text-gray-600">Utilisateurs Actifs</p>
+                    <p class="text-xs text-green-600 font-medium mt-1">
+                        <i class="fas fa-arrow-up mr-1"></i>En ligne
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-card bg-white rounded-2xl p-6 shadow-lg transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden border border-gray-100 animate-fade-in-up" style="animation-delay: 0.3s">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-red-600"></div>
+            <div class="stat-content flex items-center gap-4">
+                <div class="stat-icon bg-red-500/10 text-red-600 w-14 h-14 rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="text-3xl font-bold text-red-600 mb-1"><?php echo $utilisateursInactifs; ?></h3>
+                    <p class="text-sm font-semibold text-gray-600">Utilisateurs Inactifs</p>
+                    <p class="text-xs text-red-600 font-medium mt-1">
+                        <i class="fas fa-pause mr-1"></i>Désactivés
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-card bg-white rounded-2xl p-6 shadow-lg transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl relative overflow-hidden border border-gray-100 animate-fade-in-up" style="animation-delay: 0.4s">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-purple-600"></div>
+            <div class="stat-content flex items-center gap-4">
+                <div class="stat-icon bg-purple-500/10 text-purple-600 w-14 h-14 rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 class="text-3xl font-bold text-purple-600 mb-1"><?php echo count(array_filter($allUtilisateurs, fn($u) => strpos($u->type_utilisateur ?? '', 'Admin') !== false)); ?></h3>
+                    <p class="text-sm font-semibold text-gray-600">Administrateurs</p>
+                    <p class="text-xs text-purple-600 font-medium mt-1">
+                        <i class="fas fa-shield-alt mr-1"></i>Privilégiés
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="bg-gray-card-bg rounded-xl shadow-lg p-6 border border-gray-border mb-8 initial-hidden" style="animation-delay: 0.5s;">
         <h2 class="text-2xl font-bold text-custom-primary-dark mb-6 text-center lg:text-left">
@@ -774,7 +804,7 @@ $utilisateurs = array_slice($allUtilisateurs, $offset, $limit);
                     <div class="flex justify-end gap-4 pt-3 border-t border-gray-100">
                         <button type="button" onclick="closeMasseModal()" class="px-4 py-2 rounded-lg text-sm font-medium shadow-sm text-gray-700 bg-gray-card-bg hover:bg-gray-100 transition-all duration-200"> <i class="fas fa-times mr-2"></i>Annuler
                         </button>
-                        <button type="submit" name="btn_add_multiple" class="px-4 py-2 rounded-lg shadow-lg bg-gradient-primary hover:shadow-xl transition-all duration-200"> <i class="fas fa-users mr-2"></i>Ajouter en masse
+                        <button type="submit" name="btn_add_multiple" class="px-4 py-2 rounded-lg shadow-lg bg-gradient-primary hover:shadow-xl transition-all duration-200"> <i class="fas fa-users mr-2"></i>Ajouter le(s) utilisateur(s) sélectionné(s)
                         </button>
                     </div>
                 </form>
@@ -1154,7 +1184,7 @@ $utilisateurs = array_slice($allUtilisateurs, $offset, $limit);
 
         document.getElementById('userMasse').addEventListener('submit', function(e) {
             e.preventDefault();
-            showLoader("Ajout en masse en cours...");
+            showLoader("Ajout multiple en cours...");
             this.submit();
         });
 

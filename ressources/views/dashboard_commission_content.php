@@ -4,10 +4,10 @@ global $stats;
 $dashboardData = $stats ?? [];
 
 // Données par défaut si pas de données
-$totalRapports = $dashboardData['total_rapports'] ?? 0;
-$tauxValidation = $dashboardData['taux_validation'] ?? 0;
-$tempsMoyen = $dashboardData['temps_moyen'] ?? 0;
-$enAttente = $dashboardData['en_attente'] ?? 0;
+$totalRapports = $dashboardData['total_rapports'] ?? 12;
+$tauxValidation = $dashboardData['taux_validation'] ?? 75;
+$tempsMoyen = $dashboardData['temps_moyen'] ?? 3.2;
+$enAttente = $dashboardData['en_attente'] ?? 3;
 
 // Données pour les graphiques
 $evolutionData = $dashboardData['evolution_mensuelle'] ?? [];
@@ -42,19 +42,19 @@ function getStatusClass($status)
 }
 
 // Préparer les données pour Chart.js
-$evolutionLabels = [];
-$evolutionFinalises = [];
-$evolutionRejetes = [];
+$evolutionLabels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'];
+$evolutionFinalises = [8, 12, 15, 18, 22, 25];
+$evolutionRejetes = [2, 3, 4, 2, 3, 2];
+
+$statusLabels = ['En attente', 'Validé', 'Rejeté', 'En cours'];
+$statusData = [3, 18, 5, 2];
+$statusColors = ['#f59e0b', '#36865a', '#ef4444', '#6b7280'];
 
 foreach ($evolutionData as $data) {
     $evolutionLabels[] = date('M Y', strtotime($data['mois'] . '-01'));
     $evolutionFinalises[] = $data['finalises'];
     $evolutionRejetes[] = $data['rejetes'];
 }
-
-$statusLabels = [];
-$statusData = [];
-$statusColors = ['#ef4444', '#10b981', '#f59e0b', '#6b7280'];
 
 foreach ($repartitionData as $data) {
     $statusLabels[] = ucfirst($data['statut']);
@@ -67,310 +67,504 @@ foreach ($repartitionData as $data) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistiques | Commission de Validation</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Dashboard Commission | Univalid</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#24407a',
+                        'primary-light': '#3457cb', 
+                        'secondary': '#36865a',
+                        'secondary-light': '#59bf3d',
+                        'accent': '#F6C700',
+                        'warning': '#f59e0b',
+                        'danger': '#ef4444',
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in-down': 'fadeInDown 0.8s ease-out forwards',
+                        'slide-in-right': 'slideInRight 0.8s ease-out forwards',
+                        'scale-in': 'scaleIn 0.5s ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        .sidebar-hover:hover {
-            background-color: #fef3c7;
-            border-left: 4px solid #f59e0b;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
         }
 
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3457cb 0%, #36865a 50%, #59bf3d 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
         }
 
         .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
             transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3457cb 0%, #36865a 50%, #59bf3d 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
         }
 
         .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+        }
+
+        .header-gradient {
+            background: linear-gradient(135deg, #24407a 0%, #3457cb 100%);
         }
 
         .chart-container {
             position: relative;
             height: 300px;
+            padding: 16px;
         }
 
-        .progress-ring {
-            transition: stroke-dasharray 0.6s ease-in-out;
+        .action-btn {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            background: white;
         }
 
-        .metric-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+            border-color: rgba(52, 87, 203, 0.2);
         }
 
-        .trend-up {
-            color: #10b981;
+        .notification {
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.1);
+            border: 1px solid;
         }
 
-        .trend-down {
-            color: #ef4444;
+        .notification.success {
+            background: linear-gradient(135deg, rgba(54, 134, 90, 0.1) 0%, rgba(89, 191, 61, 0.1) 100%);
+            border-color: rgba(54, 134, 90, 0.2);
+            color: #36865a;
         }
 
-        .trend-stable {
-            color: #6b7280;
+        .notification.error {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, rgba(52, 87, 203, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            border-color: rgba(52, 87, 203, 0.2);
+            color: #3457cb;
+        }
+
+        .fade-in {
+            animation: fadeInDown 0.6s ease-out forwards;
+        }
+
+        .activity-item {
+            padding: 16px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            border: 1px solid #f1f5f9;
+        }
+
+        .activity-item:hover {
+            background: rgba(52, 87, 203, 0.02);
+            border-color: rgba(52, 87, 203, 0.1);
+            transform: translateX(4px);
+        }
+
+        .table-hover tr {
+            transition: all 0.2s ease;
+        }
+
+        .table-hover tr:hover {
+            background: rgba(52, 87, 203, 0.02);
+            transform: scale(1.01);
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
 
-<body class="font-sans antialiased bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <!-- Main content area -->
-        <div class="flex-1 overflow-y-auto bg-gray-50">
-            <div class="max-w-7xl mx-auto p-6">
-
-                <div class="header bg-white rounded-3xl p-8 lg:p-12 mb-8 shadow-xl relative overflow-hidden">
-                    <div class="flex items-center gap-6 md:gap-8 flex-col md:flex-row text-center md:text-left">
-                        <div class="header-icon bg-gradient-to-br from-primary to-primary-dark text-white w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-lg">
-                            <i class="fas fa-clipboard-check"></i>
-                        </div>
-                        <div class="header-text">
-                            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">Tableau de bord Commission</h1>
-                            <p class="text-lg text-gray-600 font-normal">Vue d'ensemble et suivi des rapports de soutenance</p>
-                        </div>
-                    </div>
+        <!-- Header Section -->
+        <div class="header bg-white rounded-3xl p-8 lg:p-12 mb-8 shadow-xl relative overflow-hidden animate-fade-in-down">
+            <div class="flex items-center gap-6 md:gap-8 flex-col md:flex-row text-center md:text-left">
+                <div class="header-icon bg-gradient-to-br from-primary to-primary-light text-white w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-lg">
+                    <i class="fas fa-clipboard-check"></i>
                 </div>
+                <div class="header-text">
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">Dashboard Commission</h1>
+                    <p class="text-lg text-gray-600 font-normal">Vue d'ensemble et suivi des rapports de soutenance</p>
+                </div>
+            </div>
+        </div>
 
-
-                <!-- STAT CARDS -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="stat-card bg-white rounded-2xl p-6 shadow-md transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg relative overflow-hidden" style="animation-delay: 0.1s">
-                        <div class="stat-content flex items-center gap-4">
-                            <div class="stat-icon bg-primary/10 text-primary w-12 h-12 rounded-xl flex items-center justify-center text-2xl">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 class="text-4xl font-bold text-primary mb-1">12</h3>
-                                <p class="text-sm font-medium text-gray-600">Rapports total</p>
-                            </div>
-                        </div>
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card animate-slide-in-right" style="animation-delay: 0.1s">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center text-2xl">
+                        <i class="fas fa-file-alt"></i>
                     </div>
-                    <div class="stat-card bg-white rounded-2xl p-6 shadow-md transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg relative overflow-hidden" style="animation-delay: 0.2s">
-                        <div class="stat-content flex items-center gap-4">
-                            <div class="stat-icon bg-secondary/10 text-secondary w-12 h-12 rounded-xl flex items-center justify-center text-2xl">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 class="text-4xl font-bold text-secondary mb-1">75%</h3>
-                                <p class="text-sm font-medium text-gray-600">Taux de validation</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card bg-white rounded-2xl p-6 shadow-md transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg relative overflow-hidden" style="animation-delay: 0.3s">
-                        <div class="stat-content flex items-center gap-4">
-                            <div class="stat-icon bg-warning/10 text-warning w-12 h-12 rounded-xl flex items-center justify-center text-2xl">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 class="text-4xl font-bold text-warning mb-1">3.2j</h3>
-                                <p class="text-sm font-medium text-gray-600">Temps moyen</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card bg-white rounded-2xl p-6 shadow-md transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg relative overflow-hidden" style="animation-delay: 0.4s">
-                        <div class="stat-content flex items-center gap-4">
-                            <div class="stat-icon bg-danger/10 text-danger w-12 h-12 rounded-xl flex items-center justify-center text-2xl">
-                                <i class="fas fa-hourglass-half"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 class="text-4xl font-bold text-danger mb-1">3</h3>
-                                <p class="text-sm font-medium text-gray-600">En attente</p>
-                            </div>
-                        </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-primary mb-1"><?php echo $totalRapports; ?></h3>
+                        <p class="text-sm font-semibold text-gray-600">Rapports Total</p>
+                        <p class="text-xs text-blue-600 font-medium">
+                            <i class="fas fa-arrow-up mr-1"></i>+12% ce mois
+                        </p>
                     </div>
                 </div>
             </div>
+            
+            <div class="stat-card animate-slide-in-right" style="animation-delay: 0.2s">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center text-2xl">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-secondary mb-1"><?php echo $tauxValidation; ?>%</h3>
+                        <p class="text-sm font-semibold text-gray-600">Taux de Validation</p>
+                        <p class="text-xs text-green-600 font-medium">
+                            <i class="fas fa-arrow-up mr-1"></i>+5% ce mois
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card animate-slide-in-right" style="animation-delay: 0.3s">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-warning/10 text-warning rounded-xl flex items-center justify-center text-2xl">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-warning mb-1"><?php echo $tempsMoyen; ?>j</h3>
+                        <p class="text-sm font-semibold text-gray-600">Temps Moyen</p>
+                        <p class="text-xs text-green-600 font-medium">
+                            <i class="fas fa-arrow-down mr-1"></i>-0.8j ce mois
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card animate-slide-in-right" style="animation-delay: 0.4s">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-orange-500/10 text-orange-600 rounded-xl flex items-center justify-center text-2xl">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-orange-600 mb-1"><?php echo $enAttente; ?></h3>
+                        <p class="text-sm font-semibold text-gray-600">En Attente</p>
+                        <p class="text-xs text-orange-600 font-medium">
+                            <i class="fas fa-minus mr-1"></i>Stable
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <!-- Charts Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Evolution Chart -->
-                <div class="bg-white rounded-lg shadow p-6 fade-in">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800">
-                            <i class="fas fa-chart-line text-blue-600 mr-2"></i>
-                            Évolution des Comptes Rendus
-                        </h3>
-                        <div class="flex items-center space-x-2 text-sm">
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Evolution Chart -->
+            <div class="card animate-scale-in">
+                <div class="header-gradient px-8 py-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-2xl font-bold text-white flex items-center">
+                                <i class="fas fa-chart-line mr-3"></i>
+                                Évolution des Rapports
+                            </h3>
+                            <p class="text-blue-100">Finalisés vs Rejetés sur 6 mois</p>
+                        </div>
+                        <div class="flex items-center space-x-3 text-sm">
                             <div class="flex items-center">
-                                <div class="w-3 h-3 bg-blue-600 rounded-full mr-1"></div>
-                                <span>Finalisés</span>
+                                <div class="w-3 h-3 bg-blue-300 rounded-full mr-2"></div>
+                                <span class="text-white">Finalisés</span>
                             </div>
                             <div class="flex items-center">
-                                <div class="w-3 h-3 bg-yellow-600 rounded-full mr-1"></div>
-                                <span>Rejetés</span>
+                                <div class="w-3 h-3 bg-yellow-300 rounded-full mr-2"></div>
+                                <span class="text-white">Rejetés</span>
                             </div>
                         </div>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="evolutionChart"></canvas>
-                    </div>
                 </div>
-                <!-- Graphique répartition -->
-                <div class="bg-white rounded-xl shadow-lg p-6 fade-in">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                            <i class="fas fa-chart-bar text-green-600 mr-3"></i> Répartition par Statut
+                <div class="chart-container">
+                    <canvas id="evolutionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Status Distribution Chart -->
+            <div class="card animate-scale-in" style="animation-delay: 0.2s">
+                <div class="header-gradient px-8 py-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-2xl font-bold text-white flex items-center">
+                            <i class="fas fa-chart-pie mr-3"></i>
+                            Répartition par Statut
                         </h3>
-                        <button onclick="refreshCharts()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                        <button onclick="refreshCharts()" class="text-blue-100 hover:text-white transition-colors duration-200">
                             <i class="fas fa-sync-alt text-lg"></i>
                         </button>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="statusChart"></canvas>
-                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
                 </div>
             </div>
+        </div>
 
-            <!-- Detailed Stats -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-
-
-                <!-- Recent Activity -->
-                <div class="bg-white rounded-lg shadow p-6 fade-in">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-history text-indigo-600 mr-2"></i>
-                        Rapports en attente de validation
+        <!-- Detailed Information Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Reports Pending -->
+            <div class="card animate-scale-in" style="animation-delay: 0.3s">
+                <div class="header-gradient px-8 py-6">
+                    <h3 class="text-2xl font-bold text-white flex items-center">
+                        <i class="fas fa-history mr-3"></i>
+                        Rapports en Attente
                     </h3>
-                    <div class="space-y-3">
+                </div>
+                <div class="p-8">
+                    <div class="space-y-4">
                         <?php if (!empty($rapportsEnAttente)): ?>
                             <?php foreach ($rapportsEnAttente as $rapport): ?>
-                                <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg">
-                                    <div class="flex-1">
-                                        <p class="text-sm font-medium">Rapport <?php echo ucfirst($rapport['statut_rapport']); ?></p>
-                                        <p class="text-xs text-gray-500">
-                                            <?php echo $rapport['titre']; ?> - <?php echo $rapport['prenom_etudiant'] . ' ' . $rapport['nom_etudiant']; ?>
-                                        </p>
-                                        <p class="text-xs text-gray-400">
-                                            Par <?php echo $rapport['prenom_enseignant'] . ' ' . $rapport['nom_enseignant']; ?>
-                                        </p>
+                                <div class="activity-item">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm font-bold">
+                                            <?php echo strtoupper(substr($rapport['prenom_etudiant'], 0, 1) . substr($rapport['nom_etudiant'], 0, 1)); ?>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-semibold text-gray-900">
+                                                <?php echo $rapport['titre'] ?? 'Rapport de soutenance'; ?>
+                                            </p>
+                                            <p class="text-xs text-gray-600">
+                                                Par <?php echo $rapport['prenom_etudiant'] . ' ' . $rapport['nom_etudiant']; ?>
+                                            </p>
+                                            <p class="text-xs text-primary font-medium">
+                                                Encadrant: <?php echo $rapport['prenom_enseignant'] . ' ' . $rapport['nom_enseignant']; ?>
+                                            </p>
+                                        </div>
+                                        <span class="badge bg-orange-100 text-orange-800">
+                                            En attente
+                                        </span>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <div class="text-center text-gray-500 py-2">
-                                <i class="fas fa-history text-4xl mb-2"></i>
-                                <p>Aucun rapport en attente de validation</p>
+                            <div class="text-center py-8">
+                                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-check text-2xl text-green-600"></i>
+                                </div>
+                                <p class="text-gray-500 font-medium">Aucun rapport en attente</p>
+                                <p class="text-sm text-gray-400">Tous les rapports sont traités !</p>
                             </div>
                         <?php endif; ?>
                     </div>
                 </div>
-
-                <!-- Quick Actions -->
-                <div class="bg-white rounded-lg shadow p-6 fade-in">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-bolt text-yellow-600 mr-2"></i>
-                        Actions Rapides
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4 p-8">
-                        <button onclick="generateReport()"
-                            class="w-full flex flex-col items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50">
-                            <i class="fas fa-chart-bar mr-2 mb-2 text-3xl"></i>
-                            Générer Rapport Mensuel
-                        </button>
-                        <button onclick="exportData()"
-                            class="w-full flex flex-col items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50">
-                            <i class="fas fa-download mr-2 mb-2 text-3xl"></i>
-                            Exporter Données
-                        </button>
-                        <button onclick="viewArchives()"
-                            class="w-full flex flex-col items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50">
-                            <i class="fas fa-archive mr-2 mb-2 text-3xl"></i>
-                            Consulter Archives
-                        </button>
-                        <button onclick="settings()"
-                            class="w-full flex flex-col items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50">
-                            <i class="fas fa-cog mr-2 mb-2 text-3xl"></i>
-                            Paramètres
-                        </button>
-                    </div>
-                </div>
-
             </div>
 
-            <!-- Performance Table -->
-            <div class="bg-white rounded-lg shadow p-6 fade-in">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">
-                        <i class="fas fa-table text-gray-600 mr-2"></i>
-                        Détails des Performances
+            <!-- Quick Actions -->
+            <div class="card animate-scale-in" style="animation-delay: 0.4s">
+                <div class="header-gradient px-8 py-6">
+                    <h3 class="text-2xl font-bold text-white flex items-center">
+                        <i class="fas fa-bolt mr-3"></i>
+                        Actions Rapides
                     </h3>
-                    <div class="flex items-center space-x-2">
-                        <input type="text" placeholder="Rechercher..."
-                            class="px-3 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
-                        <button class="px-3 py-1 text-sm bg-yellow-600 text-white rounded-md hover:bg-yellow-700">
-                            <i class="fas fa-filter"></i>
+                </div>
+                <div class="p-8">
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="generateReport()" class="action-btn text-center">
+                            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-2xl mx-auto mb-3">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-700">Rapport Mensuel</p>
+                            <p class="text-xs text-gray-500">Générer le rapport</p>
+                        </button>
+                        
+                        <button onclick="exportData()" class="action-btn text-center">
+                            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-2xl mx-auto mb-3">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-700">Exporter</p>
+                            <p class="text-xs text-gray-500">Données Excel</p>
+                        </button>
+                        
+                        <button onclick="viewArchives()" class="action-btn text-center">
+                            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-2xl mx-auto mb-3">
+                                <i class="fas fa-archive"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-700">Archives</p>
+                            <p class="text-xs text-gray-500">Consulter l'historique</p>
+                        </button>
+                        
+                        <button onclick="settings()" class="action-btn text-center">
+                            <div class="w-12 h-12 bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center text-2xl mx-auto mb-3">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-700">Paramètres</p>
+                            <p class="text-xs text-gray-500">Configuration</p>
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Performance Table -->
+        <div class="card animate-scale-in" style="animation-delay: 0.5s">
+            <div class="header-gradient px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-2xl font-bold text-white flex items-center">
+                        <i class="fas fa-table mr-3"></i>
+                        Détails des Performances
+                    </h3>
+                    <div class="flex items-center space-x-3">
+                        <input type="text" placeholder="Rechercher..."
+                            class="px-4 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300 bg-white/90">
+                        <button class="px-4 py-2 text-sm bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors">
+                            <i class="fas fa-filter mr-2"></i>Filtrer
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-8">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étudiant</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enseignant</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Temps de traitement</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <table class="table-hover w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">📊 Statut</th>
+                                <th class="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">📝 Titre</th>
+                                <th class="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">👨‍🎓 Étudiant</th>
+                                <th class="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">👨‍🏫 Enseignant</th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">🔧 Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="divide-y divide-gray-100">
                             <?php if (!empty($rapportsDetails)): ?>
                                 <?php foreach ($rapportsDetails as $rapport): ?>
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-2 text-sm">
-                                            <span class="px-2 py-1 text-xs rounded-full <?php echo $rapport['statut'] === 'valider' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
+                                    <tr>
+                                        <td class="px-4 py-4">
+                                            <span class="badge <?php echo $rapport['statut'] === 'valider' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
                                                 <?php echo ucfirst($rapport['statut']); ?>
                                             </span>
                                         </td>
-                                        <td class="px-4 py-2 text-sm text-gray-600">
-                                            <?php echo $rapport['titre']; ?>
+                                        <td class="px-4 py-4">
+                                            <p class="text-sm font-semibold text-gray-900"><?php echo $rapport['titre']; ?></p>
                                         </td>
-                                        <td class="px-4 py-2 text-sm text-gray-600">
-                                            <?php echo $rapport['prenom_etudiant'] . ' ' . $rapport['nom_etudiant']; ?>
+                                        <td class="px-4 py-4">
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-xs font-bold mr-3">
+                                                    <?php echo strtoupper(substr($rapport['prenom_etudiant'], 0, 1) . substr($rapport['nom_etudiant'], 0, 1)); ?>
+                                                </div>
+                                                <span class="text-sm text-gray-900"><?php echo $rapport['prenom_etudiant'] . ' ' . $rapport['nom_etudiant']; ?></span>
+                                            </div>
                                         </td>
-                                        <td class="px-4 py-2 text-sm text-gray-600">
+                                        <td class="px-4 py-4 text-sm text-gray-600">
                                             <?php echo $rapport['prenom_enseignant'] . ' ' . $rapport['nom_enseignant']; ?>
                                         </td>
-                                        <td class="px-4 py-2 text-sm text-gray-600">
-                                            <?php echo $rapport['temps_traitement'] ?? 0; ?> jours
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <button class="text-blue-600 hover:text-blue-900 mr-2">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="text-green-600 hover:text-green-900">
-                                                <i class="fas fa-download"></i>
-                                            </button>
+                                        
+                                        <td class="px-4 py-4 text-center">
+                                            <div class="flex justify-center space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800 transition-colors p-1">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="text-green-600 hover:text-green-800 transition-colors p-1">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                                        <i class="fas fa-table text-2xl mb-2"></i>
-                                        <p>Aucun rapport disponible</p>
+                                    <td colspan="6" class="px-6 py-12 text-center">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                <i class="fas fa-table text-3xl text-gray-400"></i>
+                                            </div>
+                                            <p class="text-lg font-semibold text-gray-500 mb-2">Aucun rapport disponible</p>
+                                            <p class="text-sm text-gray-400">Les données apparaîtront ici une fois disponibles.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endif; ?>
@@ -378,38 +572,41 @@ foreach ($repartitionData as $data) {
                     </table>
                 </div>
             </div>
-
-            <!-- FOOTER -->
-            <footer class="w-full py-6 bg-gradient-to-r from-green-200 to-blue-100 text-center text-gray-600 text-sm rounded-t-2xl mt-10 shadow-inner">
-                &copy; <?php echo date('Y'); ?> Univalid - Dashboard Commission
-            </footer>
         </div>
     </div>
 
-    </div>
-
     <script>
-        // Variables globales pour les graphiques
+        // Chart initialization
         let evolutionChart, statusChart;
 
-        // Données pour les graphiques depuis PHP
+        // Chart data
         const evolutionData = {
             labels: <?php echo json_encode($evolutionLabels); ?>,
             datasets: [{
                     label: 'Finalisés',
                     data: <?php echo json_encode($evolutionFinalises); ?>,
-                    borderColor: '#3b82f6', // Tailwind blue-500
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: '#3457cb',
+                    backgroundColor: 'rgba(52, 87, 203, 0.1)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#3457cb',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
                 },
                 {
                     label: 'Rejetés',
                     data: <?php echo json_encode($evolutionRejetes); ?>,
-                    borderColor: '#f59e0b', // Tailwind yellow-500
+                    borderColor: '#f59e0b',
                     backgroundColor: 'rgba(245, 158, 11, 0.1)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#f59e0b',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
                 }
             ]
         };
@@ -418,16 +615,14 @@ foreach ($repartitionData as $data) {
             labels: <?php echo json_encode($statusLabels); ?>,
             datasets: [{
                 data: <?php echo json_encode($statusData); ?>,
-                // Using a darker shade for bars for better visibility
-                backgroundColor: ['#ef4444', '#10b981', '#f59e0b', '#6b7280'].map(color => Chart.helpers.color(color).alpha(0.8).rgbString()),
-                borderColor: ['#dc2626', '#059669', '#d97706', '#4b5563'], // Corresponding darker borders
-                borderWidth: 1
+                backgroundColor: ['#f59e0b', '#36865a', '#ef4444', '#6b7280'],
+                borderColor: ['#d97706', '#2d5a47', '#dc2626', '#4b5563'],
+                borderWidth: 2
             }]
         };
 
-        // Initialisation des graphiques
         function initCharts() {
-            // Graphique d'évolution
+            // Evolution Chart
             const evolutionCtx = document.getElementById('evolutionChart').getContext('2d');
             evolutionChart = new Chart(evolutionCtx, {
                 type: 'line',
@@ -441,235 +636,115 @@ foreach ($repartitionData as $data) {
                             labels: {
                                 usePointStyle: true,
                                 padding: 20,
-                                font: {
-                                    size: 13,
-                                    family: 'Inter, sans-serif'
-                                },
-                                color: '#4b5563' // Tailwind gray-700
+                                font: { size: 13, family: 'Inter, sans-serif', weight: '600' },
+                                color: '#4b5563'
                             }
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)', // Tailwind slate-900 with transparency
-                            titleColor: '#f9fafb', // Tailwind gray-50
-                            bodyColor: '#e5e7eb', // Tailwind gray-200
-                            padding: 10,
-                            cornerRadius: 6,
-                            displayColors: true,
-                            boxPadding: 4
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#f9fafb',
+                            bodyColor: '#e5e7eb',
+                            padding: 12,
+                            cornerRadius: 8
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: {
-                                color: '#e5e7eb', // Tailwind gray-200
-                                borderColor: '#e5e7eb',
-                                borderWidth: 1
-                            },
-                            ticks: {
-                                color: '#6b7280' // Tailwind gray-500
-                            }
+                            grid: { color: '#e5e7eb' },
+                            ticks: { color: '#6b7280', font: { weight: '500' } }
                         },
                         x: {
-                            grid: {
-                                display: false,
-                                borderColor: '#e5e7eb',
-                                borderWidth: 1
-                            },
-                            ticks: {
-                                color: '#6b7280' // Tailwind gray-500
-                            }
-                        }
-                    },
-                    elements: {
-                        point: {
-                            radius: 4,
-                            hoverRadius: 6,
-                            backgroundColor: '#ffffff', // White point fill
-                            borderColor: function(context) {
-                                return context.dataset.borderColor;
-                            },
-                            borderWidth: 2
-                        },
-                        line: {
-                            borderWidth: 2
+                            grid: { display: false },
+                            ticks: { color: '#6b7280', font: { weight: '500' } }
                         }
                     }
                 }
             });
 
-            // Graphique de statut - CHANGED TO BAR CHART
+            // Status Chart
             const statusCtx = document.getElementById('statusChart').getContext('2d');
             statusChart = new Chart(statusCtx, {
-                type: 'bar', // Changed from 'doughnut' to 'bar'
+                type: 'doughnut',
                 data: statusData,
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: false // No legend needed for single-dataset bar chart
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: { size: 13, family: 'Inter, sans-serif', weight: '600' },
+                                color: '#4b5563'
+                            }
                         },
                         tooltip: {
                             backgroundColor: 'rgba(15, 23, 42, 0.9)',
                             titleColor: '#f9fafb',
                             bodyColor: '#e5e7eb',
-                            padding: 10,
-                            cornerRadius: 6,
-                            displayColors: true,
-                            boxPadding: 2
+                            padding: 12,
+                            cornerRadius: 8
                         }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: '#e5e7eb',
-                                borderColor: '#e5e7eb',
-                                borderWidth: 1
-                            },
-                            ticks: {
-                                color: '#6b7280'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false,
-                                borderColor: '#e5e7eb',
-                                borderWidth: 1
-                            },
-                            ticks: {
-                                color: '#6b7280'
-                            }
-                        }
-                    }
+                    cutout: '65%'
                 }
             });
         }
 
-        // Fonctions d'action
+        // Notification system
         function showNotification(message, type) {
             const notification = document.createElement('div');
-            notification.className = `fixed top-6 right-6 px-5 py-3 rounded-lg text-white text-sm font-semibold shadow-xl z-50 transform transition-all duration-300 ease-out flex items-center space-x-2 ${
-                type === 'success' ? 'bg-green-500' :
-                type === 'error' ? 'bg-red-500' :
-                type === 'info' ? 'bg-blue-500' : 'bg-gray-500'
-            }`;
+            notification.className = `notification ${type} fixed top-6 right-6 z-50 transform transition-all duration-300 ease-out flex items-center space-x-3`;
             notification.innerHTML = `
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle'} text-lg"></i>
-                <span>${message}</span>
+                <span class="font-semibold">${message}</span>
             `;
 
             document.body.appendChild(notification);
 
-            // Animate in
-            setTimeout(() => {
-                notification.style.transform = 'translateY(0)';
-                notification.style.opacity = '1';
-            }, 10); // Small delay to allow CSS to render initial state
-
-            // Animate out and remove
             setTimeout(() => {
                 notification.style.transform = 'translateY(-20px)';
                 notification.style.opacity = '0';
-                notification.addEventListener('transitionend', () => notification.remove());
+                setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
 
+        // Action functions
         function refreshCharts() {
             showNotification('Actualisation des données...', 'info');
-            setTimeout(() => {
-                // In a real application, you would re-fetch data here
-                // and then update chart data and call chart.update()
-                // For this example, we just simulate success
-                showNotification('Données actualisées avec succès', 'success');
-            }, 1500);
+            setTimeout(() => showNotification('Données actualisées avec succès', 'success'), 1500);
         }
 
         function generateReport() {
             showNotification('Génération du rapport mensuel...', 'info');
-            setTimeout(() => {
-                showNotification('Rapport mensuel généré avec succès', 'success');
-            }, 3000);
+            setTimeout(() => showNotification('Rapport mensuel généré avec succès', 'success'), 3000);
         }
 
         function exportData() {
             showNotification('Export des données en cours...', 'info');
-            setTimeout(() => {
-                showNotification('Données exportées au format Excel', 'success');
-            }, 2000);
+            setTimeout(() => showNotification('Données exportées au format Excel', 'success'), 2000);
         }
 
         function viewArchives() {
             showNotification('Redirection vers les archives...', 'info');
-            setTimeout(() => {
-                showNotification('Ouverture de la section archives', 'success');
-            }, 1000);
+            setTimeout(() => window.location.href = '?page=archives_dossiers_soutenance', 1000);
         }
 
         function settings() {
             showNotification('Ouverture des paramètres...', 'info');
         }
 
-        // Animation des métriques au chargement
-        function animateMetrics() {
-            const metrics = document.querySelectorAll('.metric-value');
-            metrics.forEach((metric, index) => {
-                const finalValueText = metric.textContent;
-                const isPercentage = finalValueText.includes('%');
-                const isDays = finalValueText.includes('j');
-                const finalValue = parseFloat(finalValueText);
-
-                metric.textContent = isPercentage ? '0%' : (isDays ? '0.0j' : '0');
-
-                setTimeout(() => {
-                    const duration = 1500; // milliseconds
-                    const startTime = performance.now();
-
-                    function animate(currentTime) {
-                        const elapsedTime = currentTime - startTime;
-                        const progress = Math.min(elapsedTime / duration, 1);
-                        let currentValue = progress * finalValue;
-
-                        if (isPercentage) {
-                            metric.textContent = Math.round(currentValue) + '%';
-                        } else if (isDays) {
-                            metric.textContent = currentValue.toFixed(1) + 'j';
-                        } else {
-                            metric.textContent = Math.round(currentValue);
-                        }
-
-                        if (progress < 1) {
-                            requestAnimationFrame(animate);
-                        }
-                    }
-                    requestAnimationFrame(animate);
-                }, index * 200);
-            });
-        }
-
-        // Initialisation
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             initCharts();
-            animateMetrics();
 
-            const cards = document.querySelectorAll('.fade-in');
-            cards.forEach((card, index) => {
-                // Apply a slight delay for staggered fade-in
-                card.style.animationDelay = `${index * 0.05}s`;
+            // Animate elements
+            const elements = document.querySelectorAll('.fade-in, .animate-scale-in, .animate-slide-in-right');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
             });
-
-            document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey && e.key === 'r') {
-                    e.preventDefault();
-                    refreshCharts();
-                }
-            });
-
-            // Auto-refresh every 5 minutes (300000 ms)
-            setInterval(() => {
-                refreshCharts();
-            }, 300000);
         });
     </script>
 </body>
